@@ -39,11 +39,20 @@ export const metadata: Metadata = {
     title: 'TU Coverify - Tribhuvan University Lab Report Cover Page Generator',
     description: 'Generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages with real-time live preview.',
     siteName: 'TU Coverify',
+    images: [
+      {
+        url: '/preview.png',
+        width: 1200,
+        height: 630,
+        alt: 'TU Coverify Preview',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'TU Coverify - TU Lab Report Cover Page Generator',
     description: 'Generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages with real-time live preview.',
+    images: ['/preview.png'],
   },
   metadataBase: new URL('https://tu-coverify.onrender.com'),
 };
