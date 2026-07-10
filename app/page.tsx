@@ -53,90 +53,6 @@ const SPECIMEN_POOL: FormData[] = [
     batch: "2082",
     teacherName: "Prof. Dr. Hari Prasad",
   },
-  {
-    collegeName: "Patan Multiple Campus",
-    collegeLocation: "Patandhoka, Lalitpur",
-    subjectName: "Database Management Systems",
-    courseCode: "CSC 260",
-    program: "BSc CSIT",
-    semester: "Fourth Semester",
-    studentName: "Rohan Shrestha",
-    rollNumber: "15/80",
-    regdNumber: "5-2-37-123-2023",
-    examRollNumber: "80010145",
-    batch: "2080",
-    teacherName: "Prof. Dr. Sarita Dahal",
-  },
-  {
-    collegeName: "St. Xavier's College",
-    collegeLocation: "Maitighar, Kathmandu",
-    subjectName: "Object Oriented Programming",
-    courseCode: "CSC 160",
-    program: "BSc CSIT",
-    semester: "Second Semester",
-    studentName: "Pooja Adhikari",
-    rollNumber: "22/81",
-    regdNumber: "5-2-45-890-2024",
-    examRollNumber: "81010212",
-    batch: "2081",
-    teacherName: "Sushil Nepal",
-  },
-  {
-    collegeName: "Trichandra Multiple Campus",
-    collegeLocation: "Ghantaghar, Kathmandu",
-    subjectName: "Artificial Intelligence",
-    courseCode: "CSC 364",
-    program: "BSc CSIT",
-    semester: "Sixth Semester",
-    studentName: "Saurav Karki",
-    rollNumber: "04/79",
-    regdNumber: "5-2-29-456-2022",
-    examRollNumber: "79010321",
-    batch: "2079",
-    teacherName: "Er. Ram Prasad Sapkota",
-  },
-  {
-    collegeName: "Madan Bhandari Memorial College",
-    collegeLocation: "New Baneshwor, Kathmandu",
-    subjectName: "Computer Networks",
-    courseCode: "CSC 314",
-    program: "BSc CSIT",
-    semester: "Fifth Semester",
-    studentName: "Aayushma Pandey",
-    rollNumber: "32/80",
-    regdNumber: "5-2-88-789-2023",
-    examRollNumber: "80010198",
-    batch: "2080",
-    teacherName: "Surendra Bahadur Shrestha",
-  },
-  {
-    collegeName: "Kathmandu Bernhardt College",
-    collegeLocation: "Balkhu, Kathmandu",
-    subjectName: "Theory of Computation",
-    courseCode: "CSC 257",
-    program: "BSc CSIT",
-    semester: "Third Semester",
-    studentName: "Niranjan Dhakal",
-    rollNumber: "12/81",
-    regdNumber: "5-2-11-205-2024",
-    examRollNumber: "81010043",
-    batch: "2081",
-    teacherName: "Anil Verma",
-  },
-  {
-    collegeName: "Birendra Multiple Campus",
-    collegeLocation: "Bharatpur, Chitwan",
-    subjectName: "Design and Analysis of Algorithms",
-    courseCode: "CSC 311",
-    program: "BSc CSIT",
-    semester: "Fifth Semester",
-    studentName: "Sandesh Bhattarai",
-    rollNumber: "18/80",
-    regdNumber: "5-2-55-129-2023",
-    examRollNumber: "80010344",
-    batch: "2080",
-    teacherName: "Dr. Roshan Karki",
-  }
 ];
 
 const EMPTY_DEFAULTS: FormData = {
@@ -250,7 +166,7 @@ export default function Home() {
   };
 
   const handleReset = () => {
-    if (window.confirm("Are you sure you want to load a random academic specimen? This will overwrite your current fields.")) {
+    if (window.confirm("Reset to sample cover page details? This will overwrite your inputs.")) {
       const randomIdx = Math.floor(Math.random() * SPECIMEN_POOL.length);
       setFormData(SPECIMEN_POOL[randomIdx]);
       setLogoBase64("");
@@ -472,9 +388,9 @@ export default function Home() {
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">TU Coverify — Generate Official Cover Pages</h2>
+                  <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">TU Coverify — TU Ko Cover Page, Ek Minute Ma</h2>
                   <p className="mt-1 text-xs text-gray-500 dark:text-neutral-400 leading-relaxed">
-                    A professional-grade, Typst-powered document builder. Recreates the exact, official TU lab report cover page layout with metric-perfect spacing and standard typography.
+                    Fill in your details and get a ready-to-print TU lab report cover page. No more fixing margins in Word — just type, preview, and download.
                   </p>
                 </div>
               </div>
@@ -490,7 +406,7 @@ export default function Home() {
               <div className="flex items-center justify-between border-b border-gray-100 pb-4 dark:border-zinc-800">
                 <div className="flex items-center space-x-2">
                   <FileText className="h-4 w-4 text-gray-500" />
-                  <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400">Template Fields</h3>
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400">Cover Page Fields</h3>
                 </div>
               </div>
 
@@ -501,7 +417,7 @@ export default function Home() {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2 border-b border-gray-100 pb-2.5 dark:border-zinc-800/80">
                     <div className="h-4 w-1 rounded-full bg-black dark:bg-white" />
-                    <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">1. Institution Metadata</h4>
+                    <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">1. College Info</h4>
                   </div>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
@@ -533,7 +449,7 @@ export default function Home() {
                 <div className="border-t border-gray-100 pt-5 dark:border-zinc-800">
                   <div className="flex items-center space-x-2 border-b border-gray-100 pb-2.5 dark:border-zinc-800/80">
                     <div className="h-4 w-1 rounded-full bg-black dark:bg-white" />
-                    <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">2. Subject & Course Information</h4>
+                    <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">2. Subject Details</h4>
                   </div>
                   <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="sm:col-span-2">
@@ -576,7 +492,7 @@ export default function Home() {
                 <div className="border-t border-gray-100 pt-5 dark:border-zinc-800">
                   <div className="flex items-center space-x-2 border-b border-gray-100 pb-2.5 dark:border-zinc-800/80">
                     <div className="h-4 w-1 rounded-full bg-black dark:bg-white" />
-                    <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">3. Student Particulars</h4>
+                    <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">3. Your Details</h4>
                   </div>
                   <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
@@ -652,10 +568,10 @@ export default function Home() {
                 <div className="border-t border-gray-100 pt-5 dark:border-zinc-800">
                   <div className="flex items-center space-x-2 border-b border-gray-100 pb-2.5 dark:border-zinc-800/80">
                     <div className="h-4 w-1 rounded-full bg-black dark:bg-white" />
-                    <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">4. Evaluation / Supervisor</h4>
+                    <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">4. Teacher</h4>
                   </div>
                   <div className="mt-4">
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">Submitted To (Teacher/Supervisor Name)</label>
+                    <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">Teacher / Supervisor Name</label>
                     <input
                       id="teacher-name-input"
                       type="text"
@@ -679,7 +595,7 @@ export default function Home() {
             >
               <div className="flex items-center space-x-2 border-b border-gray-100 pb-4 dark:border-zinc-800">
                 <ImageIcon className="h-4 w-4 text-gray-500" />
-                <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400">College Logo (Right Side)</h3>
+                <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400">College Logo</h3>
               </div>
 
               <div className="mt-4 flex flex-col sm:flex-row items-center gap-5">
@@ -756,7 +672,7 @@ export default function Home() {
             >
               <div className="flex items-center space-x-2 border-b border-gray-100 pb-4 dark:border-zinc-800">
                 <Download className="h-4 w-4 text-gray-500" />
-                <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400">Export and Downloads</h3>
+                <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400">Download Cover Page</h3>
               </div>
 
               {/* Download Buttons Matrix */}
@@ -852,7 +768,7 @@ export default function Home() {
               <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-zinc-800">
                 <div className="flex items-center space-x-2">
                   <Eye className="h-4 w-4 text-gray-500" />
-                  <span className="font-bold text-xs uppercase tracking-wider text-gray-400">Live Render Preview</span>
+                  <span className="font-bold text-xs uppercase tracking-wider text-gray-400">Live Preview</span>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -896,7 +812,7 @@ export default function Home() {
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-white dark:bg-white dark:text-black shadow-md animate-spin mb-3">
                         <RefreshCw className="h-5 w-5" />
                       </div>
-                      <p className="font-mono text-xs font-semibold text-neutral-700 dark:text-neutral-300">Rendering Typst Template...</p>
+                      <p className="font-mono text-xs font-semibold text-neutral-700 dark:text-neutral-300">Generating Preview...</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -906,7 +822,7 @@ export default function Home() {
                   <div className="absolute inset-x-6 top-6 z-20 flex items-start space-x-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 shadow-sm dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400 animate-fade-in">
                     <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs font-bold">Typst Render Error</p>
+                      <p className="text-xs font-bold">Compilation Error</p>
                       <p className="text-[11px] font-mono mt-1 text-red-600 dark:text-red-400 break-all leading-relaxed">{compileError}</p>
                     </div>
                   </div>
