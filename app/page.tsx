@@ -388,7 +388,7 @@ export default function Home() {
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">TU Coverify — TU Ko Cover Page, Ek Minute Ma</h2>
+                  <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">TU Coverify</h2>
                   <p className="mt-1 text-xs text-gray-500 dark:text-neutral-400 leading-relaxed">
                     Fill in your details and get a ready-to-print TU lab report cover page. No more fixing margins in Word — just type, preview, and download.
                   </p>
