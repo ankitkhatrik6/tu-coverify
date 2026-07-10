@@ -19,7 +19,33 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'TU Coverify - Tribhuvan University Lab Report Cover Page Generator',
-  description: 'Generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages with real-time live preview and professional bento design.',
+  description: 'Generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages with real-time live preview. No more fixing margins in Word — just type, preview, and download.',
+  keywords: [
+    'TU Cover Page', 
+    'Tribhuvan University', 
+    'Lab Report', 
+    'BSc CSIT Cover Page', 
+    'TU Assignment Front Page',
+    'TU Lab Report Format',
+    'Nepal',
+    'Cover Page Generator'
+  ],
+  authors: [{ name: 'Ankit Khatri KC', url: 'https://github.com/ankitkhatrik6' }],
+  creator: 'Ankit Khatri KC',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://tu-coverify.onrender.com',
+    title: 'TU Coverify - Tribhuvan University Lab Report Cover Page Generator',
+    description: 'Generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages with real-time live preview.',
+    siteName: 'TU Coverify',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TU Coverify - TU Lab Report Cover Page Generator',
+    description: 'Generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages with real-time live preview.',
+  },
+  metadataBase: new URL('https://tu-coverify.onrender.com'),
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {

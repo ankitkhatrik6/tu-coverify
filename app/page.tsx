@@ -329,9 +329,6 @@ export default function Home() {
           
           {/* Brand */}
           <div className="flex items-center space-x-2.5">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-black flex items-center justify-center rounded-lg text-white dark:bg-white dark:text-black shrink-0">
-              <span className="font-bold text-[10px] sm:text-xs">TU</span>
-            </div>
             <h1 id="app-title" className="font-bold tracking-tight text-base sm:text-xl leading-none">
               TU <span className="text-gray-400">Coverify</span>
             </h1>
