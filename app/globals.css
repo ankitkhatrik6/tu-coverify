@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-display), system-ui, sans-serif;
+  --font-mono: var(--font-mono), monospace;
+
+  --color-border: #e4e4e7;
+  --color-ring: #18181b;
+  --color-background: #ffffff;
+  --color-foreground: #09090b;
+
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
+}
+
+/* Custom minimal focus outline */
+*:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Smooth custom scrollbars for Bento cards */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e4e4e7;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4d4d8;
+}
+
+/* Dark mode configurations for the UI (the document preview remains light) */
+.dark {
+  --color-border: #27272a;
+  --color-ring: #fafafa;
+  --color-background: #09090b;
+  --color-foreground: #fafafa;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}

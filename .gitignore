@@ -1,0 +1,8 @@
+node_modules/
+.next/
+coverage/
+.DS_Store
+*.log
+.env*
+bin/
+public/uploads/
