@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
       examRollNumber = "820015",
       batch = "2082",
       teacherName = "Prof. Dr. Hari Prasad",
+      teacherDepartment = "Department of CSIT",
       logoBase64,
       format = "pdf",
     } = data;
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
         examRollNumber,
         batch,
         teacherName,
+        teacherDepartment,
         logoBase64,
       });
 
@@ -200,7 +202,11 @@ export async function POST(req: NextRequest) {
     #v(52pt)
     #line(length: 88%, stroke: 0.8pt + black)
     #v(4pt)
-    #text(size: 14pt, weight: "regular")[${teacherName}]
+    #stack(
+      spacing: 9pt,
+      [#text(size: 14pt)[${teacherName}]],
+      [#text(size: 14pt)[${teacherDepartment}]]
+    )
   ]
 )
     `;

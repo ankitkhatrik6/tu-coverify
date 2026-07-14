@@ -36,6 +36,7 @@ interface FormData {
   examRollNumber: string;
   batch: string;
   teacherName: string;
+  teacherDepartment: string;
 }
 
 const SPECIMEN_POOL: FormData[] = [
@@ -52,6 +53,7 @@ const SPECIMEN_POOL: FormData[] = [
     examRollNumber: "820015",
     batch: "2082",
     teacherName: "Prof. Dr. Hari Prasad",
+    teacherDepartment: "Department of CSIT",
   },
 ];
 
@@ -68,6 +70,7 @@ const EMPTY_DEFAULTS: FormData = {
   examRollNumber: "",
   batch: "",
   teacherName: "",
+  teacherDepartment: "",
 };
 
 export default function Home() {
@@ -567,16 +570,29 @@ export default function Home() {
                     <div className="h-4 w-1 rounded-full bg-black dark:bg-white" />
                     <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">4. Teacher</h4>
                   </div>
-                  <div className="mt-4">
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">Teacher / Supervisor Name</label>
-                    <input
-                      id="teacher-name-input"
-                      type="text"
-                      value={formData.teacherName}
-                      onChange={(e) => handleInputChange("teacherName", e.target.value)}
-                      className="mt-1.5 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:bg-white focus:border-black focus:ring-2 focus:ring-black/5 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-neutral-100 dark:placeholder:text-zinc-600 dark:focus:bg-zinc-950 dark:focus:border-white dark:focus:ring-white/5 transition-all"
-                      placeholder="e.g. Prof. Dr. Hari Prasad"
-                    />
+                  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">Teacher / Supervisor Name</label>
+                      <input
+                        id="teacher-name-input"
+                        type="text"
+                        value={formData.teacherName}
+                        onChange={(e) => handleInputChange("teacherName", e.target.value)}
+                        className="mt-1.5 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:bg-white focus:border-black focus:ring-2 focus:ring-black/5 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-neutral-100 dark:placeholder:text-zinc-600 dark:focus:bg-zinc-950 dark:focus:border-white dark:focus:ring-white/5 transition-all"
+                        placeholder="e.g. Prof. Dr. Hari Prasad"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">Department</label>
+                      <input
+                        id="teacher-department-input"
+                        type="text"
+                        value={formData.teacherDepartment || ""}
+                        onChange={(e) => handleInputChange("teacherDepartment", e.target.value)}
+                        className="mt-1.5 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:bg-white focus:border-black focus:ring-2 focus:ring-black/5 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-neutral-100 dark:placeholder:text-zinc-600 dark:focus:bg-zinc-950 dark:focus:border-white dark:focus:ring-white/5 transition-all"
+                        placeholder="e.g. Department of CSIT"
+                      />
+                    </div>
                   </div>
                 </div>
 

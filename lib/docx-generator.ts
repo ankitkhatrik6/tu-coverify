@@ -29,6 +29,7 @@ interface CoverPageData {
   examRollNumber: string;
   batch: string;
   teacherName: string;
+  teacherDepartment?: string;
   logoBase64?: string; // uploaded college logo as base64 string
 }
 
@@ -377,6 +378,16 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
                 children: [
                   new TextRun({
                     text: data.teacherName || "Gyani Ray",
+                    font: "Times New Roman",
+                    size: 28, // 14pt
+                  }),
+                ],
+              }),
+              new Paragraph({
+                spacing: { before: 120, after: 0 },
+                children: [
+                  new TextRun({
+                    text: data.teacherDepartment || "",
                     font: "Times New Roman",
                     size: 28, // 14pt
                   }),
