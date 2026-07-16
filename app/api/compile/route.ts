@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
     const {
       collegeName = "Amrit Science Campus",
       collegeLocation = "Lainchaur, Kathmandu",
+      facultyOrInstitute = "Institute of Science and Technology",
       subjectName = "Introduction to Information Technology",
       courseCode = "CSC 114",
       program = "BSc CSIT",
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
       const docxBuffer = await generateDocx({
         collegeName,
         collegeLocation,
+        facultyOrInstitute,
         subjectName,
         courseCode,
         program,
@@ -138,7 +140,7 @@ export async function POST(req: NextRequest) {
     #v(3pt)
     #text(size: 16pt)[Tribhuvan University] \\
     #v(3pt)
-    #text(size: 15pt)[Institute of Science and Technology] \\
+    #text(size: 15pt)[${facultyOrInstitute}] \\
     #v(6pt)
     #text(size: 20pt, weight: "bold")[${collegeName}] \\
     #v(3pt)

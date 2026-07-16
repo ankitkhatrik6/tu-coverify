@@ -19,6 +19,7 @@ import sharp from "sharp";
 interface CoverPageData {
   collegeName: string;
   collegeLocation: string;
+  facultyOrInstitute?: string;
   subjectName: string;
   courseCode: string;
   program: string;
@@ -160,7 +161,7 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
                 spacing: { before: 0, after: 120 },
                 children: [
                   new TextRun({
-                    text: "Institute of Science and Technology",
+                    text: data.facultyOrInstitute || "Institute of Science and Technology",
                     font: "Times New Roman",
                     size: 30, // 15pt
                   }),
