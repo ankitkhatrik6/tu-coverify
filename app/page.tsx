@@ -290,11 +290,60 @@ export default function Home() {
       alert("Invalid file format. Please upload PNG, JPG, JPEG, or SVG.");
       return;
     }
+
+    // Skip compression for SVG
+    if (file.type === "image/svg+xml") {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result && typeof e.target.result === "string") {
+          setLogoBase64(e.target.result);
+          setLogoFilename(file.name);
+        }
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    // Compress raster images (PNG, JPG) using Canvas
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result && typeof e.target.result === "string") {
-        setLogoBase64(e.target.result);
-        setLogoFilename(file.name);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            // Convert to JPEG for smaller size, 70% quality
+            const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+            setLogoBase64(compressedBase64);
+            setLogoFilename(file.name);
+          } else {
+            // Fallback if canvas fails
+            setLogoBase64(e.target?.result as string);
+            setLogoFilename(file.name);
+          }
+        };
+        img.src = e.target.result;
       }
     };
     reader.readAsDataURL(file);
