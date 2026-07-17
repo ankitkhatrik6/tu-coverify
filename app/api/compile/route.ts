@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
       const typstCmd = `"${typstBin}" compile "${tempTypPath}" "${tempOutputPath}"${ppiOption}`;
       
       await execAsync(typstCmd, { 
-        env: { PATH: process.env.PATH || "", HOME: process.env.HOME || "" }
+        env: { PATH: process.env.PATH || "", HOME: process.env.HOME || "" } as NodeJS.ProcessEnv
       });
 
       // Read compiled output
@@ -482,7 +482,7 @@ export async function POST(req: NextRequest) {
     const typstCmd = `"${typstBin}" compile "${tempTypPath}" "${tempOutputPath}"${ppiOption}`;
     
     await execAsync(typstCmd, { 
-      env: { PATH: process.env.PATH || "", HOME: process.env.HOME || "" }
+      env: { PATH: process.env.PATH || "", HOME: process.env.HOME || "" } as NodeJS.ProcessEnv
     });
 
     // 6. Read compiled output
