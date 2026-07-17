@@ -18,17 +18,17 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'TU Coverify - Tribhuvan University Lab Report Cover Page Generator',
-  description: 'Generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages with real-time live preview. No more fixing margins in Word — just type, preview, and download.',
+  title: 'TU Coverify | TU Lab Report Cover Page Generator',
+  description: 'Instantly generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages and Lab Indexes. Free, fast, and exactly formatted to TU standards.',
   keywords: [
     'TU Cover Page', 
     'Tribhuvan University', 
-    'Lab Report', 
+    'Lab Report Generator', 
     'BSc CSIT Cover Page', 
     'TU Assignment Front Page',
     'TU Lab Report Format',
     'Nepal',
-    'Cover Page Generator'
+    'Coverify'
   ],
   authors: [{ name: 'Ankit Khatri KC', url: 'https://github.com/ankitkhatrik6' }],
   creator: 'Ankit Khatri KC',
@@ -36,22 +36,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://tu-coverify.onrender.com',
-    title: 'TU Coverify - Tribhuvan University Lab Report Cover Page Generator',
-    description: 'Generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages with real-time live preview.',
+    title: 'TU Coverify | TU Lab Report Cover Page Generator',
+    description: 'Instantly generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages. Free, fast, and exactly formatted to TU standards.',
     siteName: 'TU Coverify',
     images: [
       {
         url: '/preview.png',
         width: 1200,
         height: 630,
-        alt: 'TU Coverify Preview',
+        alt: 'TU Coverify Preview Interface',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TU Coverify - TU Lab Report Cover Page Generator',
-    description: 'Generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages with real-time live preview.',
+    title: 'TU Coverify | TU Lab Report Cover Page Generator',
+    description: 'Instantly generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages.',
     images: ['/preview.png'],
   },
   metadataBase: new URL('https://tu-coverify.onrender.com'),

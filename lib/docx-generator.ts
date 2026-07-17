@@ -81,10 +81,10 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
 
   // 3. Generate the three vertical divider lines (Trishul) as a PNG buffer to guarantee perfect alignment
   const linesSvg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" width="150" height="150">
-      <rect x="42" y="32.5" width="2.6" height="85" fill="black" />
-      <rect x="72.7" y="10" width="4.6" height="130" fill="black" />
-      <rect x="105.4" y="32.5" width="2.6" height="85" fill="black" />
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+      <rect x="47.75" y="35" width="4.5" height="110" fill="black" />
+      <rect x="86.5" y="10" width="7" height="160" fill="black" />
+      <rect x="127.75" y="35" width="4.5" height="110" fill="black" />
     </svg>
   `;
   let linesPngBuffer: Buffer;
@@ -109,41 +109,42 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
   // Right column: College Logo (width 1.2 inches)
   const headerTable = new Table({
     width: {
-      size: 100,
+      size: "100%",
       type: WidthType.PERCENTAGE,
     },
     borders: {
-      top: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      bottom: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      left: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      right: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      insideVertical: { style: BorderStyle.NONE, size: 0, color: "auto" },
+      top: { style: BorderStyle.NONE },
+      bottom: { style: BorderStyle.NONE },
+      left: { style: BorderStyle.NONE },
+      right: { style: BorderStyle.NONE },
+      insideHorizontal: { style: BorderStyle.NONE },
+      insideVertical: { style: BorderStyle.NONE },
     },
     rows: [
       new TableRow({
         children: [
           // Left Cell (TU Logo)
           new TableCell({
-            width: { size: 20, type: WidthType.PERCENTAGE },
+            width: { size: "20%", type: WidthType.PERCENTAGE },
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
                 children: tuLogoBuffer.length > 0 ? [
                   new ImageRun({
                     data: tuLogoBuffer,
+                    type: "png",
                     transformation: {
                       width: 68,
                       height: 68,
                     },
-                  } as any),
+                  }),
                 ] : [],
               }),
             ],
           }),
           // Center Cell (Details Text)
           new TableCell({
-            width: { size: 60, type: WidthType.PERCENTAGE },
+            width: { size: "60%", type: WidthType.PERCENTAGE },
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
@@ -194,18 +195,19 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
           }),
           // Right Cell (College Logo)
           new TableCell({
-            width: { size: 20, type: WidthType.PERCENTAGE },
+            width: { size: "20%", type: WidthType.PERCENTAGE },
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
                 children: collegeLogoBuffer.length > 0 ? [
                   new ImageRun({
                     data: collegeLogoBuffer,
+                    type: "png",
                     transformation: {
                       width: 68,
                       height: 68,
                     },
-                  } as any),
+                  }),
                 ] : [],
               }),
             ],
@@ -221,11 +223,12 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
     children: linesPngBuffer.length > 0 ? [
       new ImageRun({
         data: linesPngBuffer,
+        type: "png",
         transformation: {
-          width: 110,
-          height: 110,
+          width: 145,
+          height: 145,
         },
-      } as any),
+      }),
     ] : [],
   });
 
@@ -233,7 +236,7 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
   const reportSection = [
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { before: 0, after: 120 },
+      spacing: { before: 0, after: 80 },
       children: [
         new TextRun({
           text: "Lab Report",
@@ -245,10 +248,10 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { before: 0, after: 80 },
+      spacing: { before: 0, after: 40 },
       children: [
         new TextRun({
-          text: data.subjectName || "Introduction to Information Technology",
+          text: data.subjectName || "Microprocessor",
           font: "Times New Roman",
           size: 32, // 16pt
           bold: true,
@@ -257,10 +260,10 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { before: 0, after: 120 },
+      spacing: { before: 0, after: 80 },
       children: [
         new TextRun({
-          text: data.courseCode ? `(${data.courseCode})` : "(CSC 114)",
+          text: data.courseCode ? `(${data.courseCode})` : "(CSC 167)",
           font: "Times New Roman",
           size: 30, // 15pt
           bold: true,
@@ -272,7 +275,7 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
       spacing: { before: 0, after: 0 },
       children: [
         new TextRun({
-          text: `${data.program || "BSc CSIT"} ${data.semester || "First Semester"}`,
+          text: `${data.program || "BSc CSIT"} ${data.semester || "Second Semester"}`,
           font: "Times New Roman",
           size: 32, // 16pt
           bold: true,
@@ -284,23 +287,23 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
   // Bottom Section (Submitted by & Submitted to columns)
   const bottomTable = new Table({
     width: {
-      size: 100,
+      size: "100%",
       type: WidthType.PERCENTAGE,
     },
     borders: {
-      top: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      bottom: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      left: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      right: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "auto" },
-      insideVertical: { style: BorderStyle.NONE, size: 0, color: "auto" },
+      top: { style: BorderStyle.NONE },
+      bottom: { style: BorderStyle.NONE },
+      left: { style: BorderStyle.NONE },
+      right: { style: BorderStyle.NONE },
+      insideHorizontal: { style: BorderStyle.NONE },
+      insideVertical: { style: BorderStyle.NONE },
     },
     rows: [
       new TableRow({
         children: [
           // Submitted By Cell
           new TableCell({
-            width: { size: 55, type: WidthType.PERCENTAGE },
+            width: { size: "55%", type: WidthType.PERCENTAGE },
             children: [
               new Paragraph({
                 spacing: { before: 0, after: 160 },
@@ -346,7 +349,7 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
           }),
           // Submitted To Cell
           new TableCell({
-            width: { size: 45, type: WidthType.PERCENTAGE },
+            width: { size: "45%", type: WidthType.PERCENTAGE },
             children: [
               new Paragraph({
                 spacing: { before: 0, after: 160 },
@@ -367,7 +370,7 @@ export async function generateDocx(data: CoverPageData): Promise<Buffer> {
                 spacing: { before: 0, after: 80 },
                 children: [
                   new TextRun({
-                    text: "--------------------------------------------------",
+                    text: "--------------------------------------------------------",
                     font: "Times New Roman",
                     size: 24,
                     color: "555555",
