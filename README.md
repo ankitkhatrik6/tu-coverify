@@ -2,8 +2,8 @@
 
 # 📄 TU Coverify
 
-**Stop wasting time formatting lab report cover pages.**  
-Generate pixel-perfect, print-ready **Tribhuvan University** cover pages in seconds — with live preview, multiple export formats, and your college logo.
+**Stop wasting time formatting lab report documents.**  
+Generate pixel-perfect, print-ready **Tribhuvan University** cover pages and lab indexes in seconds — with live preview, multiple export formats, and your college logo.
 
 <br/>
 
@@ -23,7 +23,7 @@ Generate pixel-perfect, print-ready **Tribhuvan University** cover pages in seco
 
 ## ✨ What is this?
 
-TU Coverify is a web app I built to solve a problem every TU student faces — spending 20+ minutes reformatting a Word document just to get a properly aligned cover page. This tool generates the **exact official TU lab report cover page layout** using the Typst typesetting engine, with real-time preview and one-click export.
+TU Coverify is a web app I built to solve a problem every TU student faces — spending 20+ minutes reformatting a Word document just to get a properly aligned cover page. This tool generates the **exact official TU lab report cover page layout and lab index tables** using the Typst typesetting engine, with real-time preview and one-click export.
 
 Fill in your details → preview instantly → download. That's it.
 
@@ -31,12 +31,13 @@ Fill in your details → preview instantly → download. That's it.
 
 ## 🚀 Features
 
-- ⚡ **Real-time live preview** — Cover page renders as you type with a 450ms debounced Typst engine
+- ⚡ **Real-time live preview** — Document renders as you type with an optimized asynchronous Typst engine
+- 📑 **Lab Index Generator** — Generate dynamic multi-row lab indexes with reorderable lists
 - 📥 **5 export formats** — PDF, DOCX, PNG, JPG, and raw Typst source
 - 🏫 **College logo upload** — Drag & drop your college logo (PNG, JPG, SVG)
 - 🌙 **Dark mode** — Full light/dark theme with localStorage persistence
 - 📐 **Standard A4 layout** — Portrait orientation, Times New Roman, metric-perfect spacing
-- 🎨 **Bento UI design** — Clean, modern interface that doesn't get in your way
+- 🚀 **SEO Optimized** — Professional OpenGraph and Twitter meta tags for perfect link sharing
 - 🖨️ **Direct print** — Print the PDF straight from the browser
 
 ---
@@ -104,8 +105,9 @@ tu-coverify/
 ├── bin/
 │   └── typst             # Typst binary (self-hosted)
 ├── lib/
-│   ├── docx-generator.ts # DOCX export engine
-│   └── utils.ts          # Utility helpers
+│   ├── docx-generator.ts       # DOCX export engine for Cover Pages
+│   ├── docx-index-generator.ts # DOCX export engine for Lab Index
+│   └── utils.ts                # Utility helpers
 ├── public/
 │   ├── default_college_logo.svg
 │   └── tu_logo.svg
