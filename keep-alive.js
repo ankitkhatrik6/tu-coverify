@@ -1,6 +1,6 @@
 const https = require('https');
 
-const URL = 'https://tu-coverify.onrender.com/';
+const URL = 'https://tucoverify.ankitak.com.np/';
 // Render spins down free web services after 15 minutes of inactivity.
 // We ping every 14 minutes to keep it awake.
 const INTERVAL = 14 * 60 * 1000; // 14 minutes

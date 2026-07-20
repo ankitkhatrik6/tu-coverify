@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://tu-coverify.onrender.com',
+    url: 'https://tucoverify.ankitak.com.np/',
     title: 'TU Coverify | TU Lab Report Cover Page & Index Generator',
     description: 'Instantly generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages and Lab Indexes. Free, fast, and exactly formatted to TU standards.',
     siteName: 'TU Coverify',
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   verification: {
     google: 'kV4VPBDYMLp7-qjktWPDpYWcNWjGsfLeTxkT_9J09B0',
   },
-  metadataBase: new URL('https://tu-coverify.onrender.com'),
+  metadataBase: new URL('https://tucoverify.ankitak.com.np/'),
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
