@@ -55,6 +55,9 @@ export const metadata: Metadata = {
     description: 'Instantly generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages and Lab Indexes.',
     images: ['/preview.png'],
   },
+  verification: {
+    google: 'kV4VPBDYMLp7-qjktWPDpYWcNWjGsfLeTxkT_9J09B0',
+  },
   metadataBase: new URL('https://tu-coverify.onrender.com'),
 };
 
