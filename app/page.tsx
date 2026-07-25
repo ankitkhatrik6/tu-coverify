@@ -592,16 +592,11 @@ export default function Home() {
               transition={{ duration: 0.4 }}
               className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-zinc-800/80 dark:bg-zinc-900 shadow-sm"
             >
-              <div className="flex items-start space-x-4">
-                <div className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-950 dark:bg-zinc-800 dark:text-white">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">TU Coverify</h2>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-neutral-400 leading-relaxed">
-                    Fill in your details and get a ready-to-print TU lab report cover page. No more fixing margins in Word — just type, preview, and download.
-                  </p>
-                </div>
+              <div>
+                <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">TU Coverify</h2>
+                <p className="mt-1 text-xs text-gray-500 dark:text-neutral-400 leading-relaxed">
+                  Fill in your details and get a ready-to-print TU lab report cover page. No more fixing margins in Word — just type, preview, and download.
+                </p>
               </div>
             </motion.div>
 
