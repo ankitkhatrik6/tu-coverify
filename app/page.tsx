@@ -243,9 +243,13 @@ export default function Home() {
         if (prev) URL.revokeObjectURL(prev);
         return url;
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setCompileError(err.message || "An error occurred during rendering");
+      if (err instanceof Error) {
+        setCompileError(err.message || "An error occurred during rendering");
+      } else {
+        setCompileError("An error occurred during rendering");
+      }
     } finally {
       setCompiling(false);
     }
@@ -926,7 +930,7 @@ export default function Home() {
                                   value={row.title}
                                   onChange={(e) => handleIndexRowChange(i, "title", e.target.value)}
                                   rows={3}
-                                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-950 placeholder:text-gray-400 focus:border-black focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-neutral-100 transition-all resize-y"
+                                  className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-950 placeholder:text-gray-400 focus:border-black focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-neutral-100 transition-all resize-none"
                                   placeholder="e.g. To design and verify operation of half adder..."
                                 />
                               </div>
