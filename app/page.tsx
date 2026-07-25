@@ -1230,29 +1230,29 @@ export default function Home() {
                     />
                   ) : (
                     // Placeholder card layout (Skeleton)
-                    <div className="flex h-[550px] w-[390px] flex-col justify-between p-8 text-neutral-300">
+                    <div className="flex w-[390px] max-w-full aspect-[1/1.414] flex-col justify-between p-4 sm:p-8 text-neutral-300">
                       <div className="flex justify-between items-center">
-                        <div className="h-10 w-10 rounded bg-neutral-200 animate-pulse" />
-                        <div className="space-y-2 flex-1 mx-4">
-                          <div className="h-4 w-3/4 rounded bg-neutral-200 animate-pulse mx-auto" />
-                          <div className="h-3 w-1/2 rounded bg-neutral-200 animate-pulse mx-auto" />
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded bg-neutral-200 animate-pulse shrink-0" />
+                        <div className="space-y-2 flex-1 mx-2 sm:mx-4">
+                          <div className="h-3 sm:h-4 w-3/4 rounded bg-neutral-200 animate-pulse mx-auto" />
+                          <div className="h-2 sm:h-3 w-1/2 rounded bg-neutral-200 animate-pulse mx-auto" />
                         </div>
-                        <div className="h-10 w-10 rounded bg-neutral-200 animate-pulse" />
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded bg-neutral-200 animate-pulse shrink-0" />
                       </div>
                       <div className="space-y-3">
                         <div className="h-2 w-full rounded bg-neutral-200 animate-pulse" />
                         <div className="h-2 w-full rounded bg-neutral-200 animate-pulse" />
                         <div className="h-2 w-2/3 rounded bg-neutral-200 animate-pulse" />
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-4">
                         <div className="space-y-2 w-1/2">
-                          <div className="h-3 w-2/3 rounded bg-neutral-200 animate-pulse" />
-                          <div className="h-3 w-3/4 rounded bg-neutral-200 animate-pulse" />
-                          <div className="h-3 w-1/2 rounded bg-neutral-200 animate-pulse" />
+                          <div className="h-2 sm:h-3 w-2/3 rounded bg-neutral-200 animate-pulse" />
+                          <div className="h-2 sm:h-3 w-3/4 rounded bg-neutral-200 animate-pulse" />
+                          <div className="h-2 sm:h-3 w-1/2 rounded bg-neutral-200 animate-pulse" />
                         </div>
                         <div className="space-y-2 w-1/3">
-                          <div className="h-3 w-full rounded bg-neutral-200 animate-pulse" />
-                          <div className="h-10 w-full rounded bg-neutral-200 animate-pulse" />
+                          <div className="h-2 sm:h-3 w-full rounded bg-neutral-200 animate-pulse" />
+                          <div className="h-8 sm:h-10 w-full rounded bg-neutral-200 animate-pulse" />
                         </div>
                       </div>
                     </div>
