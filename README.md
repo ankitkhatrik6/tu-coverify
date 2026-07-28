@@ -146,6 +146,6 @@ This project is open-source and available under the [MIT License](LICENSE).
 
 Made with ❤️ by **Ankit Khatri KC**
 
-*BSc CSIT Student — Tribhuvan University*
+*BSc CSIT Student, Tribhuvan University*
 
 </div>
