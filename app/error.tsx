@@ -19,6 +19,7 @@ export default function Error({
       <p className="text-gray-500 mb-6">{error.message || "An unexpected error occurred."}</p>
       <button
         onClick={() => reset()}
+        aria-label="Try again"
         className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
       >
         Try again
