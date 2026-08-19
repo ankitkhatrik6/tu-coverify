@@ -91,6 +91,13 @@ npx next start -H 0.0.0.0 -p 3000
 
 Other devices on your network can access it at `http://<your-ip>:3000`.
 
+### Deploy to Vercel
+
+The project is fully configured for zero-config deployment on Vercel. 
+The included Typst binary is packaged appropriately for Vercel's serverless functions.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fankitkhatrik6%2Ftu-coverify)
+
 ---
 
 ## 📁 Project Structure

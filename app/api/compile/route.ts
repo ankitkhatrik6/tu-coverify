@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import sharp from "sharp";
+import os from "os";
 import { generateDocx } from "@/lib/docx-generator";
 import { generateIndexDocx } from "@/lib/docx-index-generator";
 
@@ -14,8 +15,8 @@ export const dynamic = "force-dynamic";
 const execAsync = promisify(exec);
 
 export async function POST(req: NextRequest) {
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  const tmpDir = "/tmp";
+  const tmpDir = os.tmpdir();
+  const uploadDir = path.join(tmpDir, "uploads");
 
   // Ensure directories exist
   try {
@@ -135,7 +136,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Save Typst markup to temporary file
-      const tempTypPath = path.join(process.cwd(), `index_${uniqueId}.typ`);
+      const tempTypPath = path.join(tmpDir, `index_${uniqueId}.typ`);
       fs.writeFileSync(tempTypPath, typstMarkup, "utf-8");
       tempFiles.push(tempTypPath);
 
@@ -146,16 +147,20 @@ export async function POST(req: NextRequest) {
       let isMultiPageImage = false;
       
       if (typstFormat === "pdf") {
-        tempOutputPath = path.join(process.cwd(), `index_${uniqueId}.pdf`);
+        tempOutputPath = path.join(tmpDir, `index_${uniqueId}.pdf`);
         tempFiles.push(tempOutputPath);
       } else {
         // Use {n} pattern to support multiple pages without failing in Typst
-        tempOutputPath = path.join(process.cwd(), `index_${uniqueId}-{n}.${typstFormat}`);
+        tempOutputPath = path.join(tmpDir, `index_${uniqueId}-{n}.${typstFormat}`);
         isMultiPageImage = true;
       }
 
       const ppiOption = typstFormat === "png" ? " --ppi 150" : "";
       const typstBin = path.join(process.cwd(), "bin", "typst");
+      
+      // Ensure binary is executable (required on Vercel)
+      try { fs.chmodSync(typstBin, 0o755); } catch (e) { /* ignore */ }
+
       const typstCmd = `"${typstBin}" compile "${tempTypPath}" "${tempOutputPath}"${ppiOption}`;
       
       await execAsync(typstCmd, { 
@@ -170,7 +175,7 @@ export async function POST(req: NextRequest) {
         const pageFiles: string[] = [];
         let pageNum = 1;
         while (true) {
-          const pagePath = path.join(process.cwd(), `index_${uniqueId}-${pageNum}.${typstFormat}`);
+          const pagePath = path.join(tmpDir, `index_${uniqueId}-${pageNum}.${typstFormat}`);
           if (fs.existsSync(pagePath)) {
             pageFiles.push(pagePath);
             tempFiles.push(pagePath); // For automatic cleanup
@@ -341,8 +346,9 @@ export async function POST(req: NextRequest) {
         fs.writeFileSync(logoFullPath, logoBuffer);
         tempFiles.push(logoFullPath);
         
-        // Typst references relative to project root
-        collegeLogoPath = `public/uploads/${logoFilename}`;
+        // Typst references absolute paths for files outside its project root or relative to CWD.
+        // On Vercel, referencing absolute path to /tmp works.
+        collegeLogoPath = logoFullPath;
       } catch (err) {
         console.error("Failed to save custom logo:", err);
         collegeLogoPath = "public/default_college_logo.svg";
@@ -456,7 +462,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Save Typst markup to a temporary file in the project root
-    const tempTypPath = path.join(process.cwd(), `cover_${uniqueId}.typ`);
+    const tempTypPath = path.join(tmpDir, `cover_${uniqueId}.typ`);
     fs.writeFileSync(tempTypPath, typstMarkup, "utf-8");
     tempFiles.push(tempTypPath);
 
@@ -468,17 +474,21 @@ export async function POST(req: NextRequest) {
     let isMultiPageImage = false;
     
     if (typstFormat === "pdf") {
-      tempOutputPath = path.join(process.cwd(), `cover_${uniqueId}.pdf`);
+      tempOutputPath = path.join(tmpDir, `cover_${uniqueId}.pdf`);
       tempFiles.push(tempOutputPath);
     } else {
       // Use {n} pattern to support multiple pages without failing in Typst
-      tempOutputPath = path.join(process.cwd(), `cover_${uniqueId}-{n}.${typstFormat}`);
+      tempOutputPath = path.join(tmpDir, `cover_${uniqueId}-{n}.${typstFormat}`);
       isMultiPageImage = true;
     }
 
     // 5. Execute Typst Compilation
     const ppiOption = typstFormat === "png" ? " --ppi 150" : "";
     const typstBin = path.join(process.cwd(), "bin", "typst");
+    
+    // Ensure binary is executable (required on Vercel)
+    try { fs.chmodSync(typstBin, 0o755); } catch (e) { /* ignore */ }
+
     const typstCmd = `"${typstBin}" compile "${tempTypPath}" "${tempOutputPath}"${ppiOption}`;
     
     await execAsync(typstCmd, { 
@@ -493,7 +503,7 @@ export async function POST(req: NextRequest) {
       const pageFiles: string[] = [];
       let pageNum = 1;
       while (true) {
-        const pagePath = path.join(process.cwd(), `cover_${uniqueId}-${pageNum}.${typstFormat}`);
+        const pagePath = path.join(tmpDir, `cover_${uniqueId}-${pageNum}.${typstFormat}`);
         if (fs.existsSync(pagePath)) {
           pageFiles.push(pagePath);
           tempFiles.push(pagePath); // For automatic cleanup

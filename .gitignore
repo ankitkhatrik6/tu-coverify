@@ -4,5 +4,7 @@ coverage/
 .DS_Store
 *.log
 .env*
-# bin/ — included for Render deployment (Typst binary)
+# bin/ — included for Vercel/Render deployment (Typst binary)
 public/uploads/
+*.typ
+*.pdf
