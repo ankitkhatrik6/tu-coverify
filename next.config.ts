@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  serverExternalPackages: ["sharp"],
+  outputFileTracingIncludes: {
+    '/api/compile': ['./bin/typst', './public/**/*'],
+  },
 };
 
 export default nextConfig;
