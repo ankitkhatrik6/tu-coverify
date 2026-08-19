@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
       // Ensure binary is executable (required on Vercel)
       try { fs.chmodSync(typstBin, 0o755); } catch (e) { /* ignore */ }
 
-      const typstCmd = `"${typstBin}" compile "${tempTypPath}" "${tempOutputPath}"${ppiOption}`;
+      const typstCmd = `"${typstBin}" compile --root / "${tempTypPath}" "${tempOutputPath}"${ppiOption}`;
       
       await execAsync(typstCmd, { 
         env: { PATH: process.env.PATH || "", HOME: process.env.HOME || "" } as unknown as NodeJS.ProcessEnv
@@ -312,7 +312,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Handle Custom Logo File if base64 is provided
-    let collegeLogoPath = "public/default_college_logo.svg";
+    let collegeLogoPath = path.join(process.cwd(), "public", "default_college_logo.svg").replace(/\\/g, "/");
     if (logoBase64) {
       try {
         // Parse data URI: data:[<mediatype>][;base64],<data>
@@ -340,7 +340,7 @@ export async function POST(req: NextRequest) {
         }
         
         const logoFilename = `logo_${uniqueId}.${extension}`;
-        const logoFullPath = path.join(uploadDir, logoFilename);
+        const logoFullPath = path.join(uploadDir, logoFilename).replace(/\\/g, "/");
         
         // Write the decoded logo file
         fs.writeFileSync(logoFullPath, logoBuffer);
@@ -351,9 +351,11 @@ export async function POST(req: NextRequest) {
         collegeLogoPath = logoFullPath;
       } catch (err) {
         console.error("Failed to save custom logo:", err);
-        collegeLogoPath = "public/default_college_logo.svg";
+        collegeLogoPath = path.join(process.cwd(), "public", "default_college_logo.svg").replace(/\\/g, "/");
       }
     }
+
+    const tuLogoPath = path.join(process.cwd(), "public", "tu_logo.svg").replace(/\\/g, "/");
 
     // 3. Generate Typst Markup Code
     const typstMarkup = `
@@ -372,7 +374,7 @@ export async function POST(req: NextRequest) {
 #grid(
   columns: (1fr, 3.2fr, 1fr),
   align: (center + horizon, center + horizon, center + horizon),
-  image("public/tu_logo.svg", width: 62pt),
+  image("${tuLogoPath}", width: 62pt),
   [
     #set text(weight: "regular")
     #v(3pt)
@@ -489,7 +491,7 @@ export async function POST(req: NextRequest) {
     // Ensure binary is executable (required on Vercel)
     try { fs.chmodSync(typstBin, 0o755); } catch (e) { /* ignore */ }
 
-    const typstCmd = `"${typstBin}" compile "${tempTypPath}" "${tempOutputPath}"${ppiOption}`;
+    const typstCmd = `"${typstBin}" compile --root / "${tempTypPath}" "${tempOutputPath}"${ppiOption}`;
     
     await execAsync(typstCmd, { 
       env: { PATH: process.env.PATH || "", HOME: process.env.HOME || "" } as unknown as NodeJS.ProcessEnv
