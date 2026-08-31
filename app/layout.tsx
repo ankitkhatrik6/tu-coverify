@@ -61,10 +61,13 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://tucoverify.ankitak.com.np/'),
 };
 
+import FloodReliefPopup from '@/components/FloodReliefPopup';
+
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body suppressHydrationWarning className="antialiased font-sans transition-colors duration-200">
+        <FloodReliefPopup />
         {children}
       </body>
     </html>
