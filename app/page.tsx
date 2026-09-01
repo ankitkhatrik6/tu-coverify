@@ -589,41 +589,41 @@ export default function Home() {
       <main className="mx-auto mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Document Type Selector (Unified Full-Width Sub-Navigation Bar) */}
-        <div className="w-full flex flex-col sm:flex-row gap-2 sm:gap-1 rounded-xl bg-transparent sm:bg-gray-200/70 sm:p-1.5 dark:bg-transparent sm:dark:bg-zinc-900 sm:shadow-inner mb-6 sm:mb-8">
+        <div className="w-full flex rounded-xl bg-gray-200/70 p-1 dark:bg-zinc-900 shadow-inner mb-6 overflow-x-auto custom-scrollbar">
           <button
             id="tab-cover"
             onClick={() => setDocumentType("cover")}
-            className={`flex-1 flex items-center justify-center gap-2.5 py-3 sm:py-2.5 px-4 text-sm sm:text-base font-semibold rounded-xl sm:rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-4 text-[11px] sm:text-sm font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
               documentType === "cover"
-                ? "bg-white text-gray-950 shadow-md sm:shadow-sm dark:bg-zinc-800 dark:text-white border border-gray-200 sm:border-transparent dark:border-zinc-700"
-                : "bg-gray-100 sm:bg-transparent text-gray-600 hover:text-gray-950 hover:bg-gray-200/50 sm:hover:bg-transparent dark:bg-zinc-800/50 sm:dark:bg-transparent dark:text-neutral-400 dark:hover:text-white border border-transparent"
+                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
+                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
             }`}
           >
-            <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
+            <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <span>Cover Page</span>
           </button>
           <button
             id="tab-index"
             onClick={() => setDocumentType("index")}
-            className={`flex-1 flex items-center justify-center gap-2.5 py-3 sm:py-2.5 px-4 text-sm sm:text-base font-semibold rounded-xl sm:rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-4 text-[11px] sm:text-sm font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
               documentType === "index"
-                ? "bg-white text-gray-950 shadow-md sm:shadow-sm dark:bg-zinc-800 dark:text-white border border-gray-200 sm:border-transparent dark:border-zinc-700"
-                : "bg-gray-100 sm:bg-transparent text-gray-600 hover:text-gray-950 hover:bg-gray-200/50 sm:hover:bg-transparent dark:bg-zinc-800/50 sm:dark:bg-transparent dark:text-neutral-400 dark:hover:text-white border border-transparent"
+                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
+                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
             }`}
           >
-            <List className="h-4 w-4 sm:h-5 sm:w-5" />
+            <List className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <span>Lab Index</span>
           </button>
           <button
             id="tab-notices"
             onClick={() => setDocumentType("notices")}
-            className={`flex-1 flex items-center justify-center gap-2.5 py-3 sm:py-2.5 px-4 text-sm sm:text-base font-semibold rounded-xl sm:rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-4 text-[11px] sm:text-sm font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
               documentType === "notices"
-                ? "bg-white text-gray-950 shadow-md sm:shadow-sm dark:bg-zinc-800 dark:text-white border border-gray-200 sm:border-transparent dark:border-zinc-700"
-                : "bg-gray-100 sm:bg-transparent text-gray-600 hover:text-gray-950 hover:bg-gray-200/50 sm:hover:bg-transparent dark:bg-zinc-800/50 sm:dark:bg-transparent dark:text-neutral-400 dark:hover:text-white border border-transparent"
+                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
+                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
             }`}
           >
-            <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+            <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <span>TU Notices</span>
           </button>
         </div>
