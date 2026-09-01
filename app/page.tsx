@@ -14,19 +14,20 @@ import {
   Check, 
   ZoomIn, 
   ZoomOut, 
-  Maximize2,
+  Maximize2, 
   AlertCircle,
   Code,
   Image as ImageIcon,
   GraduationCap,
-  Sparkles,
   RefreshCw,
   Plus,
   Trash2,
   ArrowUp,
   ArrowDown,
-  List
+  List,
+  Bell
 } from "lucide-react";
+import TUNoticesSection from "@/components/TUNoticesSection";
 
 interface FormData {
   collegeName: string;
@@ -167,7 +168,7 @@ export default function Home() {
   const [dragActive, setDragActive] = useState<boolean>(false);
 
   // --- Document Type & Lab Index States ---
-  const [documentType, setDocumentType] = useState<"cover" | "index">("cover");
+  const [documentType, setDocumentType] = useState<"cover" | "index" | "notices">("cover");
   const [indexTitle, setIndexTitle] = useState<string>("Lab Index");
   const [indexRows, setIndexRows] = useState<IndexRow[]>(DEFAULT_INDEX_ROWS);
 
@@ -209,6 +210,7 @@ export default function Home() {
 
   // --- Typst Preview Compiler ---
   const compilePreview = useCallback(async () => {
+    if (documentType === "notices") return;
     setCompiling(true);
     setCompileError("");
     try {
@@ -523,6 +525,8 @@ export default function Home() {
     setIndexRows([]);
   };
 
+
+
   // --- UI Theme Switcher ---
   const toggleTheme = () => {
     const newDark = !darkMode;
@@ -544,7 +548,7 @@ export default function Home() {
         <div className="mx-auto flex h-14 sm:h-[64px] max-w-7xl items-center justify-between px-4 sm:px-8">
           
           {/* Brand */}
-          <div className="flex items-center space-x-2.5">
+          <div className="flex items-center space-x-3">
             <h1 id="app-title" className="font-bold tracking-tight text-base sm:text-xl leading-none">
               TU <span className="text-gray-400">Coverify</span>
             </h1>
@@ -584,60 +588,64 @@ export default function Home() {
       {/* 2. Main Content Grid */}
       <main className="mx-auto mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
+        {/* Document Type Selector (Unified Full-Width Sub-Navigation Bar) */}
+        <div className="w-full flex rounded-xl bg-gray-200/70 p-1 dark:bg-zinc-900 shadow-inner mb-6">
+          <button
+            id="tab-cover"
+            onClick={() => setDocumentType("cover")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+              documentType === "cover"
+                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
+                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
+            }`}
+          >
+            <FileText className="h-4 w-4" />
+            <span>Cover Page</span>
+          </button>
+          <button
+            id="tab-index"
+            onClick={() => setDocumentType("index")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+              documentType === "index"
+                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
+                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
+            }`}
+          >
+            <List className="h-4 w-4" />
+            <span>Lab Index</span>
+          </button>
+          <button
+            id="tab-notices"
+            onClick={() => setDocumentType("notices")}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+              documentType === "notices"
+                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
+                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
+            }`}
+          >
+            <Bell className="h-4 w-4" />
+            <span>TU Notices</span>
+          </button>
+        </div>
+
+        {documentType === "notices" ? (
+          <div className="space-y-6">
+            {/* Full Width TU Notices Section */}
+            <TUNoticesSection />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
           
           {/* --- LEFT SIDE: FORM & EXPORTS (7 Columns) --- */}
           <div className="space-y-6 lg:col-span-7">
             
-            {/* Bento Card 1: Header Welcome / Context */}
+            {/* Interactive Input Form */}
             <motion.div 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-zinc-800/80 dark:bg-zinc-900 shadow-sm"
-            >
-              <div>
-                <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">TU Coverify</h2>
-                <p className="mt-1 text-xs text-gray-500 dark:text-neutral-400 leading-relaxed">
-                  Fill in your details and get a ready-to-print TU lab report cover page. No more fixing margins in Word — just type, preview, and download.
-                </p>
-              </div>
-            </motion.div>
-
-            {/* Bento Card 2: Interactive Input Form / Document Switcher */}
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.05 }}
               className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-zinc-800/80 dark:bg-zinc-900 shadow-sm"
             >
-              {/* Document Type Selector (Tabs) */}
-              <div className="flex rounded-xl bg-gray-100 p-1 dark:bg-zinc-950 shadow-inner mb-6">
-                <button
-                  id="tab-cover"
-                  onClick={() => setDocumentType("cover")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                    documentType === "cover"
-                      ? "bg-white text-gray-950 shadow dark:bg-zinc-900 dark:text-white"
-                      : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
-                  }`}
-                >
-                  <FileText className="h-3.5 w-3.5" />
-                  Cover Page
-                </button>
-                <button
-                  id="tab-index"
-                  onClick={() => setDocumentType("index")}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                    documentType === "index"
-                      ? "bg-white text-gray-950 shadow dark:bg-zinc-900 dark:text-white"
-                      : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
-                  }`}
-                >
-                  <List className="h-3.5 w-3.5" />
-                  Lab Index Page
-                </button>
-              </div>
 
               {documentType === "cover" ? (
                 <>
@@ -861,6 +869,9 @@ export default function Home() {
                       <Trash2 className="h-3 w-3" />
                       Clear All Rows
                     </button>
+                  </div>
+
+                  <div className="mt-4">
                   </div>
 
                   <div className="mt-6 space-y-6">
@@ -1270,6 +1281,7 @@ export default function Home() {
           </div>
 
         </div>
+        )}
 
       </main>
 
