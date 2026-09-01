@@ -74,13 +74,13 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-1.5 sm:gap-2 font-medium text-neutral-700 hover:text-red-700 dark:text-neutral-300 dark:hover:text-white transition-colors group max-w-3xl"
           >
-            <span className="shrink-0 flex items-center justify-center h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-red-100 text-red-600 dark:bg-red-950/70 dark:text-red-400 border border-red-200/80 dark:border-red-900/50 shadow-xs">
-              <HeartHandshake className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+            <span className="shrink-0 hidden sm:flex items-center justify-center h-5 w-5 rounded-full bg-red-100 text-red-600 dark:bg-red-950/70 dark:text-red-400 border border-red-200/80 dark:border-red-900/50 shadow-xs">
+              <HeartHandshake className="h-3 w-3" />
             </span>
             <span className="leading-snug text-center line-clamp-2">
               Donate to the Government of Nepal Prime Minister&apos;s Disaster Relief Fund
+              <ExternalLink className="inline-block ml-1 mb-0.5 h-2.5 w-2.5 sm:h-3 sm:w-3 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
             </span>
-            <ExternalLink className="shrink-0 h-2.5 w-2.5 sm:h-3 sm:w-3 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all block" />
           </a>
         </div>
         {children}
