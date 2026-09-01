@@ -8,6 +8,7 @@ import sharp from "sharp";
 import os from "os";
 import { generateDocx } from "@/lib/docx-generator";
 import { generateIndexDocx } from "@/lib/docx-index-generator";
+import { getTypstBinary } from "@/lib/typst";
 
 // Disable HMR/Watch options for API-based temporary files
 export const dynamic = "force-dynamic";
@@ -156,11 +157,7 @@ export async function POST(req: NextRequest) {
       }
 
       const ppiOption = typstFormat === "png" ? " --ppi 150" : "";
-      const typstBin = path.join(process.cwd(), "bin", "typst");
-      
-      // Ensure binary is executable (required on Vercel)
-      try { fs.chmodSync(typstBin, 0o755); } catch (e) { /* ignore */ }
-
+      const typstBin = await getTypstBinary();
       const typstCmd = `"${typstBin}" compile --root / "${tempTypPath}" "${tempOutputPath}"${ppiOption}`;
       
       await execAsync(typstCmd, { 
@@ -486,11 +483,7 @@ export async function POST(req: NextRequest) {
 
     // 5. Execute Typst Compilation
     const ppiOption = typstFormat === "png" ? " --ppi 150" : "";
-    const typstBin = path.join(process.cwd(), "bin", "typst");
-    
-    // Ensure binary is executable (required on Vercel)
-    try { fs.chmodSync(typstBin, 0o755); } catch (e) { /* ignore */ }
-
+    const typstBin = await getTypstBinary();
     const typstCmd = `"${typstBin}" compile --root / "${tempTypPath}" "${tempOutputPath}"${ppiOption}`;
     
     await execAsync(typstCmd, { 
