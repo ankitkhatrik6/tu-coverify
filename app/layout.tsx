@@ -66,19 +66,21 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body suppressHydrationWarning className="antialiased font-sans transition-colors duration-200">
-        {/* Subtle Top Disaster Relief Donation Banner */}
-        <div className="bg-red-50/70 text-neutral-800 border-b border-red-100/80 dark:bg-zinc-950 dark:text-neutral-200 dark:border-zinc-800/80 text-[11px] sm:text-xs py-1.5 px-3 text-center transition-colors">
+        {/* Prominent Disaster Relief Donation Banner */}
+        <div className="bg-gradient-to-r from-red-50 via-white to-red-50 dark:from-red-950/40 dark:via-zinc-950 dark:to-red-950/40 text-neutral-900 dark:text-neutral-100 border-b border-red-200 dark:border-red-900/50 py-3 md:py-4 px-4 text-center transition-colors shadow-sm">
           <a
             href="https://pmdrf.nchl.com.np/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex flex-wrap items-center justify-center gap-1.5 font-medium text-neutral-700 hover:text-red-700 dark:text-neutral-300 dark:hover:text-white transition-colors group"
+            className="inline-flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 font-semibold hover:text-red-700 dark:hover:text-red-400 transition-colors group"
           >
-            <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-red-100 text-red-600 dark:bg-red-950/70 dark:text-red-400 border border-red-200/80 dark:border-red-900/50 shadow-xs shrink-0">
-              <HeartHandshake className="h-3 w-3" />
+            <span className="inline-flex items-center justify-center h-8 w-8 sm:h-6 sm:w-6 rounded-full bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400 border border-red-200 dark:border-red-800 shadow-sm shrink-0">
+              <HeartHandshake className="h-5 w-5 sm:h-4 sm:w-4" />
             </span>
-            <span>Donate to the Government of Nepal Prime Minister&apos;s Disaster Relief Fund</span>
-            <ExternalLink className="h-3 w-3 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+            <span className="text-sm sm:text-base md:text-lg tracking-tight leading-snug">
+              Donate to the Government of Nepal Prime Minister&apos;s Disaster Relief Fund
+            </span>
+            <ExternalLink className="h-4 w-4 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all shrink-0 hidden sm:block" />
           </a>
         </div>
         {children}

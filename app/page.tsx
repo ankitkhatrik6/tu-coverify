@@ -589,41 +589,41 @@ export default function Home() {
       <main className="mx-auto mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Document Type Selector (Unified Full-Width Sub-Navigation Bar) */}
-        <div className="w-full flex rounded-xl bg-gray-200/70 p-1 dark:bg-zinc-900 shadow-inner mb-6">
+        <div className="w-full flex flex-col sm:flex-row gap-2 sm:gap-1 rounded-xl bg-transparent sm:bg-gray-200/70 sm:p-1.5 dark:bg-transparent sm:dark:bg-zinc-900 sm:shadow-inner mb-6 sm:mb-8">
           <button
             id="tab-cover"
             onClick={() => setDocumentType("cover")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-2.5 py-3 sm:py-2.5 px-4 text-sm sm:text-base font-semibold rounded-xl sm:rounded-lg transition-all cursor-pointer ${
               documentType === "cover"
-                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
-                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
+                ? "bg-white text-gray-950 shadow-md sm:shadow-sm dark:bg-zinc-800 dark:text-white border border-gray-200 sm:border-transparent dark:border-zinc-700"
+                : "bg-gray-100 sm:bg-transparent text-gray-600 hover:text-gray-950 hover:bg-gray-200/50 sm:hover:bg-transparent dark:bg-zinc-800/50 sm:dark:bg-transparent dark:text-neutral-400 dark:hover:text-white border border-transparent"
             }`}
           >
-            <FileText className="h-4 w-4" />
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>Cover Page</span>
           </button>
           <button
             id="tab-index"
             onClick={() => setDocumentType("index")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-2.5 py-3 sm:py-2.5 px-4 text-sm sm:text-base font-semibold rounded-xl sm:rounded-lg transition-all cursor-pointer ${
               documentType === "index"
-                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
-                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
+                ? "bg-white text-gray-950 shadow-md sm:shadow-sm dark:bg-zinc-800 dark:text-white border border-gray-200 sm:border-transparent dark:border-zinc-700"
+                : "bg-gray-100 sm:bg-transparent text-gray-600 hover:text-gray-950 hover:bg-gray-200/50 sm:hover:bg-transparent dark:bg-zinc-800/50 sm:dark:bg-transparent dark:text-neutral-400 dark:hover:text-white border border-transparent"
             }`}
           >
-            <List className="h-4 w-4" />
+            <List className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>Lab Index</span>
           </button>
           <button
             id="tab-notices"
             onClick={() => setDocumentType("notices")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-2.5 py-3 sm:py-2.5 px-4 text-sm sm:text-base font-semibold rounded-xl sm:rounded-lg transition-all cursor-pointer ${
               documentType === "notices"
-                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
-                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
+                ? "bg-white text-gray-950 shadow-md sm:shadow-sm dark:bg-zinc-800 dark:text-white border border-gray-200 sm:border-transparent dark:border-zinc-700"
+                : "bg-gray-100 sm:bg-transparent text-gray-600 hover:text-gray-950 hover:bg-gray-200/50 sm:hover:bg-transparent dark:bg-zinc-800/50 sm:dark:bg-transparent dark:text-neutral-400 dark:hover:text-white border border-transparent"
             }`}
           >
-            <Bell className="h-4 w-4" />
+            <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>TU Notices</span>
           </button>
         </div>
