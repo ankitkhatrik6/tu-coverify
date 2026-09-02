@@ -86,7 +86,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 npm run build
 
 # Start the server (accessible on your local network)
-npx next start -H 0.0.0.0 -p 3000
+PORT=3000 HOST=0.0.0.0 node .next/standalone/server.js
 ```
 
 Other devices on your network can access it at `http://<your-ip>:3000`.
