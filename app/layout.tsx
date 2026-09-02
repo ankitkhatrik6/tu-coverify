@@ -19,16 +19,16 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'TU Coverify | TU Lab Report Cover Page & Index Generator',
-  description: 'Instantly generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages and Lab Indexes. Free, fast, and exactly formatted to TU standards.',
+  title: 'TU Coverify - Make TU Lab Report Cover Pages Online',
+  description: 'Create your Tribhuvan University (TU) lab report cover pages and index tables online for free. It is simple, fast, and uses the exact format required by TU.',
   keywords: [
     'TU Cover Page', 
     'Tribhuvan University', 
-    'Lab Report Generator', 
-    'Lab Index Generator',
+    'Lab Report Cover', 
+    'Lab Index Maker',
     'BSc CSIT Cover Page', 
     'TU Assignment Front Page',
-    'TU Lab Report Format',
+    'TU Format',
     'Nepal',
     'Coverify'
   ],
@@ -38,22 +38,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://tucoverify.ankitak.com.np/',
-    title: 'TU Coverify | TU Lab Report Cover Page & Index Generator',
-    description: 'Instantly generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages and Lab Indexes. Free, fast, and exactly formatted to TU standards.',
+    title: 'TU Coverify - Make TU Lab Report Cover Pages Online',
+    description: 'Create your Tribhuvan University (TU) lab report cover pages and index tables online for free. It is simple, fast, and uses the exact format required by TU.',
     siteName: 'TU Coverify',
     images: [
       {
         url: '/preview.png',
         width: 1200,
         height: 630,
-        alt: 'TU Coverify Preview Interface',
+        alt: 'TU Coverify Site Preview',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TU Coverify | TU Lab Report Cover Page & Index Generator',
-    description: 'Instantly generate pixel-perfect, print-ready Tribhuvan University (TU) Lab Report Cover Pages and Lab Indexes.',
+    title: 'TU Coverify - Make TU Lab Report Cover Pages Online',
+    description: 'Create your Tribhuvan University (TU) lab report cover pages and index tables online for free. Simple, fast, and accurately formatted.',
     images: ['/preview.png'],
   },
   verification: {
