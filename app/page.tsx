@@ -28,6 +28,7 @@ import {
   Bell
 } from "lucide-react";
 import TUNoticesSection from "@/components/TUNoticesSection";
+import LabIndexAIAssistant from "@/components/LabIndexAIAssistant";
 
 interface FormData {
   collegeName: string;
@@ -525,7 +526,25 @@ export default function Home() {
     setIndexRows([]);
   };
 
-
+  const handleApplyAIRows = (
+    newRows: IndexRow[],
+    newTitle?: string,
+    mode: "replace" | "append" = "replace"
+  ) => {
+    if (newTitle && newTitle.trim()) {
+      setIndexTitle(newTitle.trim());
+    }
+    if (mode === "append") {
+      const startIndex = indexRows.length;
+      const renumbered = newRows.map((r, i) => ({
+        ...r,
+        sn: String(startIndex + i + 1),
+      }));
+      setIndexRows([...indexRows, ...renumbered]);
+    } else {
+      setIndexRows(newRows);
+    }
+  };
 
   // --- UI Theme Switcher ---
   const toggleTheme = () => {
@@ -872,6 +891,10 @@ export default function Home() {
                   </div>
 
                   <div className="mt-4">
+                    <LabIndexAIAssistant
+                      currentIndexTitle={indexTitle}
+                      onApplyRows={handleApplyAIRows}
+                    />
                   </div>
 
                   <div className="mt-6 space-y-6">
