@@ -154,21 +154,16 @@ export default function LabIndexAIAssistant({
     <div className="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/70 via-purple-50/30 to-blue-50/50 p-4 dark:border-indigo-950/80 dark:from-indigo-950/20 dark:via-purple-950/10 dark:to-zinc-950/50 shadow-sm">
       
       {/* Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white dark:bg-white dark:text-black shadow-sm">
-            <Bot className="h-4 w-4 text-white dark:text-black" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black text-white dark:bg-white dark:text-black shadow-sm">
+            <Bot className="h-4 w-4 sm:h-5 sm:w-5 text-white dark:text-black" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">
-                AI Lab Index Assistant
-              </h4>
-              <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                <Zap className="mr-0.5 h-2.5 w-2.5" /> Ultra-Fast
-              </span>
-            </div>
-            <p className="text-[11px] text-gray-500 dark:text-neutral-400">
+          <div className="flex flex-col">
+            <h4 className="text-sm font-bold tracking-wide text-gray-900 dark:text-white">
+              AI Lab Index Assistant
+            </h4>
+            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-neutral-400 leading-tight">
               Type or paste your lab questions and describe how to format your table.
             </p>
           </div>
@@ -177,9 +172,9 @@ export default function LabIndexAIAssistant({
         <button
           id="toggle-ai-assistant-btn"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-1.5 rounded-lg bg-black px-3 py-1.5 text-xs font-semibold text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all cursor-pointer shadow-sm"
+          className="flex w-full sm:w-auto justify-center items-center gap-1.5 rounded-lg bg-black px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all cursor-pointer shadow-sm shrink-0"
         >
-          <BrainCircuit className="h-3.5 w-3.5 text-emerald-400 dark:text-emerald-600" />
+          <BrainCircuit className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 dark:text-emerald-600" />
           {isOpen ? "Close Assistant" : "Auto-Fill with AI"}
         </button>
       </div>
@@ -190,11 +185,11 @@ export default function LabIndexAIAssistant({
           
           {/* Single Unified Prompt Field */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-gray-700 dark:text-neutral-300">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
+              <label className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-neutral-300">
                 Prompt & Lab Questions
               </label>
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
                 {SAMPLE_PROMPTS.map((sample, idx) => (
                   <button
                     key={idx}
@@ -203,7 +198,7 @@ export default function LabIndexAIAssistant({
                       setPrompt(sample.prompt);
                       setError("");
                     }}
-                    className="text-[10px] text-gray-600 hover:text-black dark:text-neutral-400 dark:hover:text-white underline decoration-dotted px-1.5 py-0.5 rounded hover:bg-white/60 dark:hover:bg-zinc-800 transition-all cursor-pointer"
+                    className="text-[10px] sm:text-xs text-gray-600 hover:text-black dark:text-neutral-400 dark:hover:text-white underline decoration-dotted px-1.5 py-1 rounded hover:bg-white/60 dark:hover:bg-zinc-800 transition-all cursor-pointer"
                     title={`Load ${sample.name} prompt`}
                   >
                     Sample: {sample.name.split(" ")[0]}
@@ -213,9 +208,9 @@ export default function LabIndexAIAssistant({
                   <button
                     type="button"
                     onClick={() => setPrompt("")}
-                    className="text-[10px] text-gray-400 hover:text-gray-600 dark:hover:text-neutral-200 flex items-center gap-0.5 cursor-pointer ml-1"
+                    className="text-[10px] sm:text-xs text-gray-400 hover:text-gray-600 dark:hover:text-neutral-200 flex items-center gap-0.5 cursor-pointer ml-1 py-1"
                   >
-                    <RotateCcw className="h-2.5 w-2.5" /> Clear
+                    <RotateCcw className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> Clear
                   </button>
                 )}
               </div>
