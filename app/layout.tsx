@@ -20,7 +20,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'TU Coverify - Make TU Lab Report Cover Pages Online',
-  description: 'Create your Tribhuvan University (TU) lab report cover pages and index tables online for free. It is simple, fast, and uses the exact format required by TU.',
+  description: 'Tribhuvan University (TU) lab report cover pages, index tables, notices, and official B.Sc. CSIT SGPA & CGPA calculator with IoST grading formulas.',
   keywords: [
     'TU Cover Page', 
     'Tribhuvan University', 
