@@ -57,8 +57,462 @@ export async function POST(req: NextRequest) {
       indexTitle = "Lab Index",
       indexRows = [],
 
+      // Marksheet properties
+      marksheetType = "semester", // "semester" or "cumulative"
+      marksheetCourses = [],
+      marksheetSemesters = [],
+      marksheetSgpa = 0,
+      marksheetCgpa = 0,
+      marksheetTotalCredits = 0,
+      marksheetPassedCredits = 0,
+      marksheetTotalQualityPoints = 0,
+      marksheetDivisionRemarks = "Passed",
+      marksheetHasBacklog = false,
+      campusName = "Amrit Science Campus, Lainchaur, Kathmandu",
+      issueDate = "",
+
       format = "pdf",
     } = data;
+
+    // Helper for escaping Typst markup
+    const escapeTypst = (val: any): string => {
+      if (val === null || val === undefined) return "";
+      return String(val)
+        .replace(/\\/g, "\\\\")
+        .replace(/\[/g, "\\[")
+        .replace(/\]/g, "\\]")
+        .replace(/"/g, '\\"')
+        .replace(/#/g, "\\#")
+        .replace(/\$/g, "\\$");
+    };
+
+    // --- CASE C: MARKSHEET GENERATOR (TU IOST OFFICIAL FORMAT) ---
+    if (documentType === "marksheet") {
+      const tuLogoPath = path.join(process.cwd(), "public", "tu_logo.svg").replace(/\\/g, "/");
+
+      const cleanStudentName = escapeTypst(studentName || "Ankit Khatri KC");
+      const cleanExamRoll = escapeTypst(examRollNumber || rollNumber || "820015");
+      const cleanRegd = escapeTypst(regdNumber || "5-2-0033-0123-2022");
+      const cleanBatch = escapeTypst(batch || "2081 B.S.");
+      const cleanCampus = escapeTypst(campusName || collegeName || "Amrit Science Campus, Lainchaur, Kathmandu");
+      const cleanProgram = escapeTypst(program || "Bachelor of Science in Computer Science & Information Technology (B.Sc. CSIT)");
+      const cleanSemester = escapeTypst(semester || "First Semester");
+      const cleanDivision = escapeTypst(marksheetDivisionRemarks || (marksheetHasBacklog ? "Backpaper" : "Passed"));
+      const todayFormatted = issueDate || new Date().toISOString().split("T")[0];
+      const cleanIssueDate = escapeTypst(todayFormatted);
+
+      let typstMarkup = "";
+      let outputFilename = "";
+
+      if (marksheetType === "cumulative") {
+        outputFilename = `TU_IOST_BSc_CSIT_Cumulative_Transcript_${uniqueId}.pdf`;
+
+        const romanNumerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+        const semesterRowsMarkup = (marksheetSemesters && marksheetSemesters.length > 0 ? marksheetSemesters : [])
+          .map((s: any, idx: number) => {
+            const semNum = s.semesterNumber || (idx + 1);
+            const roman = romanNumerals[semNum - 1] || `${semNum}`;
+            const sName = escapeTypst(s.semesterName || `Semester ${semNum}`);
+            const credits = s.credits ?? 0;
+            const sgpaVal = Number(s.sgpa ?? 0).toFixed(2);
+            const qpVal = Number(s.qualityPoints ?? (credits * Number(s.sgpa || 0))).toFixed(2);
+            const hasBack = Boolean(s.hasBacklog);
+            const statusColor = hasBack ? 'rgb("#b91c1c")' : 'rgb("#047857")';
+            const statusText = hasBack ? "BACKLOG" : (credits > 0 && Number(sgpaVal) > 0 ? "PASS" : "-");
+            return `[${roman}], [${sName}], [${credits}], [${sgpaVal}], [${qpVal}], [#text(weight: "bold", fill: ${statusColor})[${statusText}]]`;
+          })
+          .join(",\n      ");
+
+        typstMarkup = `
+#set page(
+  paper: "a4",
+  margin: (top: 0.5in, bottom: 0.5in, left: 0.55in, right: 0.55in),
+  foreground: place(
+    center + horizon,
+    rotate(
+      -35deg,
+      text(
+        size: 16pt,
+        weight: "bold",
+        tracking: 0.8pt,
+        fill: rgb("#64748b").transparentize(82%),
+        [THIS IS GENERATED USING TU COVERIFY • NOT AN OFFICIAL MARKSHEET]
+      )
+    )
+  )
+)
+#set text(
+  font: ("Liberation Serif", "Nimbus Roman"),
+  fill: rgb("#0f172a"),
+  size: 9.5pt
+)
+
+#rect(
+  width: 100%,
+  stroke: (paint: rgb("#0f172a"), thickness: 1.5pt),
+  inset: 4pt
+)[
+  #rect(
+    width: 100%,
+    stroke: (paint: rgb("#0f172a"), thickness: 0.5pt),
+    inset: 12pt
+  )[
+    #align(center)[
+      #image("${tuLogoPath}", width: 52pt)
+      #v(5pt)
+      #text(size: 16pt, weight: "bold")[TRIBHUVAN UNIVERSITY] \\
+      #v(2pt)
+      #text(size: 12.5pt, weight: "bold")[INSTITUTE OF SCIENCE AND TECHNOLOGY] \\
+      #v(2pt)
+      #text(size: 9.5pt, weight: "medium")[Dean's Office, Examination Division] \\
+      #text(size: 9pt)[Kirtipur, Kathmandu, Nepal]
+      #v(6pt)
+      #rect(
+        fill: rgb("#f1f5f9"),
+        stroke: 0.8pt + rgb("#0f172a"),
+        inset: (x: 18pt, y: 4pt),
+        radius: 2pt
+      )[
+        #text(size: 11pt, weight: "bold")[CUMULATIVE GRADE-SHEET / TRANSCRIPT]
+      ]
+      #v(4pt)
+      #text(size: 10pt, weight: "bold")[${cleanProgram}] \\
+      #text(size: 9.5pt, weight: "bold")[Four-Year Undergraduate Degree Cumulative Record]
+    ]
+
+    #v(8pt)
+    #line(length: 100%, stroke: 0.6pt + rgb("#0f172a"))
+    #v(4pt)
+
+    #grid(
+      columns: (1.2fr, 1fr),
+      row-gutter: 4pt,
+      [#text(weight: "bold")[Student's Name:] ${cleanStudentName}],
+      [#text(weight: "bold")[Symbol / Roll No.:] ${cleanExamRoll}],
+      [#text(weight: "bold")[T.U. Regd. No.:] ${cleanRegd}],
+      [#text(weight: "bold")[Batch / Session:] ${cleanBatch}],
+      grid.cell(colspan: 2)[#text(weight: "bold")[Campus / College:] ${cleanCampus}]
+    )
+
+    #v(8pt)
+
+    #table(
+      columns: (0.7fr, 3fr, 1.2fr, 1.2fr, 1.3fr, 1fr),
+      align: (center + horizon, left + horizon, center + horizon, center + horizon, center + horizon, center + horizon),
+      stroke: 0.5pt + rgb("#334155"),
+      inset: (x: 5pt, y: 5.5pt),
+      fill: (col, row) => if row == 0 { rgb("#f1f5f9") } else { none },
+      
+      [*Sem*], [*Semester Name*], [*Credits*], [*SGPA*], [*Quality Points*], [*Remarks*],
+      
+      ${semesterRowsMarkup ? semesterRowsMarkup + "," : ""}
+
+      table.cell(colspan: 2, align: right + horizon)[#text(weight: "bold")[CUMULATIVE TOTAL:]],
+      [#text(weight: "bold")[${marksheetTotalCredits} Cr]],
+      [#text(weight: "bold")[${Number(marksheetCgpa).toFixed(2)}]],
+      [#text(weight: "bold")[${Number(marksheetTotalQualityPoints).toFixed(2)}]],
+      [#text(weight: "bold", fill: ${marksheetHasBacklog ? 'rgb("#b91c1c")' : 'rgb("#047857")'})[${marksheetHasBacklog ? "BACKLOG" : "CLEAR"}]]
+    )
+
+    #v(6pt)
+
+    #grid(
+      columns: (1fr, 1fr, 1fr, 1.2fr),
+      stroke: 0.5pt + rgb("#334155"),
+      inset: 6pt,
+      align: center + horizon,
+      [#text(size: 8.5pt)[Total Degree Credits]\\ #v(2pt) #text(size: 11pt, weight: "bold")[120 Cr]],
+      [#text(size: 8.5pt)[Completed Credits]\\ #v(2pt) #text(size: 11pt, weight: "bold")[${marksheetTotalCredits} Cr]],
+      [#text(size: 8.5pt)[Cumulative Quality Points]\\ #v(2pt) #text(size: 11pt, weight: "bold")[${Number(marksheetTotalQualityPoints).toFixed(2)}]],
+      [#text(size: 8.5pt)[Cumulative CGPA]\\ #v(2pt) #text(size: 14pt, weight: "bold")[${Number(marksheetCgpa).toFixed(2)} / 4.00]]
+    )
+
+    #v(5pt)
+    #rect(
+      width: 100%,
+      stroke: 0.5pt + rgb("#334155"),
+      inset: 5pt,
+      fill: rgb("#f8fafc")
+    )[
+      #grid(
+        columns: (1fr, 1fr),
+        [#text(weight: "bold")[Final Classification:] #text(weight: "bold", fill: ${marksheetHasBacklog ? 'rgb("#b91c1c")' : 'rgb("#047857")'})[${cleanDivision}]],
+        align(right)[#text(weight: "bold")[Degree Status:] ${marksheetHasBacklog ? "INCOMPLETE (BACKLOGS PRESENT)" : "QUALIFIED FOR B.Sc. CSIT DEGREE"}]
+      )
+    ]
+
+    #v(6pt)
+    #text(size: 8pt, weight: "bold")[OFFICIAL T.U. CGPA CLASSIFICATION STANDARD:]
+    #v(2pt)
+    #table(
+      columns: (1.5fr, 1.5fr, 3fr),
+      align: (center + horizon, center + horizon, left + horizon),
+      stroke: 0.4pt + rgb("#94a3b8"),
+      inset: (x: 4pt, y: 3pt),
+      fill: (col, row) => if row == 0 { rgb("#f1f5f9") } else { none },
+      [#text(size: 7.5pt, weight: "bold")[CGPA Range]], [#text(size: 7.5pt, weight: "bold")[Division / Classification]], [#text(size: 7.5pt, weight: "bold")[Equivalence & Criteria]],
+      [#text(size: 7.5pt)[3.60 to 4.00]], [#text(size: 7.5pt, weight: "bold")[Distinction]], [#text(size: 7.5pt)[Outstanding performance across 120 credit hours without backlogs]],
+      [#text(size: 7.5pt)[3.00 to 3.59]], [#text(size: 7.5pt, weight: "bold")[First Division]], [#text(size: 7.5pt)[Very Good academic standing (>= 70% equivalent)]],
+      [#text(size: 7.5pt)[2.40 to 2.99]], [#text(size: 7.5pt, weight: "bold")[Second Division]], [#text(size: 7.5pt)[Satisfactory performance in core & electives]],
+      [#text(size: 7.5pt)[2.00 to 2.39]], [#text(size: 7.5pt, weight: "bold")[Third Division / Pass]], [#text(size: 7.5pt)[Minimum graduation threshold (40% - 49.9%)]]
+    )
+
+    #v(16pt)
+    #grid(
+      columns: (1fr, 1fr, 1fr),
+      align: center + bottom,
+      [
+        #line(length: 70%, stroke: 0.6pt + rgb("#0f172a"))
+        #v(2pt)
+        #text(size: 8pt, weight: "bold")[Prepared by]
+      ],
+      [
+        #line(length: 70%, stroke: 0.6pt + rgb("#0f172a"))
+        #v(2pt)
+        #text(size: 8pt, weight: "bold")[Checked by]
+      ],
+      [
+        #line(length: 70%, stroke: 0.6pt + rgb("#0f172a"))
+        #v(2pt)
+        #text(size: 8pt, weight: "bold")[Controller of Examinations]
+      ]
+    )
+
+    #v(6pt)
+    #grid(
+      columns: (1fr, 1fr),
+      [#text(size: 7.5pt, fill: rgb("#64748b"))[Date of Issue: ${cleanIssueDate} (Generated via TU Coverify • Unofficial Record)]],
+      align(right)[#text(size: 7.5pt, fill: rgb("#64748b"))[Tribhuvan University, Institute of Science & Technology]]
+    )
+  ]
+]
+        `;
+      } else {
+        // Semester SGPA Marksheet
+        outputFilename = `TU_IOST_${cleanSemester.replace(/\\s+/g, "_")}_Marksheet_${uniqueId}.pdf`;
+
+        const courseRowsMarkup = (marksheetCourses && marksheetCourses.length > 0 ? marksheetCourses : [])
+          .map((c: any, idx: number) => {
+            const sn = idx + 1;
+            const code = escapeTypst(c.code || c.courseCode || "");
+            const title = escapeTypst(c.title || c.courseTitle || "");
+            const credits = c.credits ?? c.creditHours ?? 3;
+            const grade = escapeTypst(c.letterGrade || "F");
+            const gp = Number(c.gradePoint ?? 0).toFixed(1);
+            const qp = Number(c.qualityPoints ?? 0).toFixed(2);
+            const isPass = c.isPass !== false && grade !== "F";
+            const statusColor = isPass ? 'rgb("#047857")' : 'rgb("#b91c1c")';
+            const statusText = isPass ? "PASS" : "BACK";
+            return `[${sn}], [${code}], [${title}], [${credits}], [${grade}], [${gp}], [${qp}], [#text(weight: "bold", fill: ${statusColor})[${statusText}]]`;
+          })
+          .join(",\n      ");
+
+        typstMarkup = `
+#set page(
+  paper: "a4",
+  margin: (top: 0.5in, bottom: 0.5in, left: 0.55in, right: 0.55in),
+  foreground: place(
+    center + horizon,
+    rotate(
+      -35deg,
+      text(
+        size: 16pt,
+        weight: "bold",
+        tracking: 0.8pt,
+        fill: rgb("#64748b").transparentize(82%),
+        [THIS IS GENERATED USING TU COVERIFY • NOT AN OFFICIAL MARKSHEET]
+      )
+    )
+  )
+)
+#set text(
+  font: ("Liberation Serif", "Nimbus Roman"),
+  fill: rgb("#0f172a"),
+  size: 9.5pt
+)
+
+#rect(
+  width: 100%,
+  stroke: (paint: rgb("#0f172a"), thickness: 1.5pt),
+  inset: 4pt
+)[
+  #rect(
+    width: 100%,
+    stroke: (paint: rgb("#0f172a"), thickness: 0.5pt),
+    inset: 12pt
+  )[
+    #align(center)[
+      #image("${tuLogoPath}", width: 52pt)
+      #v(5pt)
+      #text(size: 16pt, weight: "bold")[TRIBHUVAN UNIVERSITY] \\
+      #v(2pt)
+      #text(size: 12.5pt, weight: "bold")[INSTITUTE OF SCIENCE AND TECHNOLOGY] \\
+      #v(2pt)
+      #text(size: 9.5pt, weight: "medium")[Dean's Office, Examination Division] \\
+      #text(size: 9pt)[Kirtipur, Kathmandu, Nepal]
+      #v(6pt)
+      #rect(
+        fill: rgb("#f1f5f9"),
+        stroke: 0.8pt + rgb("#0f172a"),
+        inset: (x: 18pt, y: 4pt),
+        radius: 2pt
+      )[
+        #text(size: 11pt, weight: "bold")[SEMESTER GRADE-SHEET]
+      ]
+      #v(4pt)
+      #text(size: 10pt, weight: "bold")[${cleanProgram}] \\
+      #text(size: 9.5pt, weight: "bold")[${cleanSemester} Examination - ${cleanBatch}]
+    ]
+
+    #v(8pt)
+    #line(length: 100%, stroke: 0.6pt + rgb("#0f172a"))
+    #v(4pt)
+
+    #grid(
+      columns: (1.2fr, 1fr),
+      row-gutter: 4pt,
+      [#text(weight: "bold")[Student's Name:] ${cleanStudentName}],
+      [#text(weight: "bold")[Symbol / Roll No.:] ${cleanExamRoll}],
+      [#text(weight: "bold")[T.U. Regd. No.:] ${cleanRegd}],
+      [#text(weight: "bold")[Batch / Session:] ${cleanBatch}],
+      grid.cell(colspan: 2)[#text(weight: "bold")[Campus / College:] ${cleanCampus}]
+    )
+
+    #v(8pt)
+
+    #table(
+      columns: (0.5fr, 1.3fr, 4.2fr, 0.7fr, 0.9fr, 0.9fr, 1.1fr, 0.9fr),
+      align: (center + horizon, center + horizon, left + horizon, center + horizon, center + horizon, center + horizon, center + horizon, center + horizon),
+      stroke: 0.5pt + rgb("#334155"),
+      inset: (x: 4pt, y: 5pt),
+      fill: (col, row) => if row == 0 { rgb("#f1f5f9") } else { none },
+      
+      [*S.N.*], [*Course Code*], [*Course Title*], [*Credit*], [*Grade*], [*Grade Point*], [*Credit Points*], [*Remarks*],
+      
+      ${courseRowsMarkup ? courseRowsMarkup + "," : ""}
+
+      table.cell(colspan: 3, align: right + horizon)[#text(weight: "bold")[TOTAL / SUMMARY:]],
+      [#text(weight: "bold")[${marksheetTotalCredits}]],
+      [-],
+      [-],
+      [#text(weight: "bold")[${Number(marksheetTotalQualityPoints).toFixed(2)}]],
+      [#text(weight: "bold", fill: ${marksheetHasBacklog ? 'rgb("#b91c1c")' : 'rgb("#047857")'})[${marksheetHasBacklog ? "BACKLOG" : "PASSED"}]]
+    )
+
+    #v(6pt)
+
+    #grid(
+      columns: (1fr, 1fr, 1fr, 1.2fr),
+      stroke: 0.5pt + rgb("#334155"),
+      inset: 6pt,
+      align: center + horizon,
+      [#text(size: 8.5pt)[Total Credits Registered]\\ #v(2pt) #text(size: 11pt, weight: "bold")[${marksheetTotalCredits} Cr]],
+      [#text(size: 8.5pt)[Total Credits Earned]\\ #v(2pt) #text(size: 11pt, weight: "bold")[${marksheetPassedCredits} Cr]],
+      [#text(size: 8.5pt)[Total Quality Points]\\ #v(2pt) #text(size: 11pt, weight: "bold")[${Number(marksheetTotalQualityPoints).toFixed(2)}]],
+      [#text(size: 8.5pt)[Semester GPA (SGPA)]\\ #v(2pt) #text(size: 14pt, weight: "bold")[${Number(marksheetSgpa).toFixed(2)} / 4.00]]
+    )
+
+    #v(5pt)
+    #rect(
+      width: 100%,
+      stroke: 0.5pt + rgb("#334155"),
+      inset: 5pt,
+      fill: rgb("#f8fafc")
+    )[
+      #grid(
+        columns: (1fr, 1fr),
+        [#text(weight: "bold")[Result Standing:] #text(weight: "bold", fill: ${marksheetHasBacklog ? 'rgb("#b91c1c")' : 'rgb("#047857")'})[${cleanDivision}]],
+        align(right)[#text(weight: "bold")[Evaluation Standard:] 40% Internal + 60% External]
+      )
+    ]
+
+    #v(6pt)
+    #text(size: 8pt, weight: "bold")[OFFICIAL T.U. IOST GRADING SCALE & SYSTEM:]
+    #v(2pt)
+    #table(
+      columns: (1fr, 1fr, 1.2fr, 1.5fr, 1fr, 1fr, 1.2fr, 1.5fr),
+      align: center + horizon,
+      stroke: 0.4pt + rgb("#94a3b8"),
+      inset: (x: 2pt, y: 3pt),
+      fill: (col, row) => if row == 0 { rgb("#f1f5f9") } else { none },
+      [#text(size: 7pt, weight: "bold")[Grade]], [#text(size: 7pt, weight: "bold")[GP]], [#text(size: 7pt, weight: "bold")[Marks]], [#text(size: 7pt, weight: "bold")[Remarks]],
+      [#text(size: 7pt, weight: "bold")[Grade]], [#text(size: 7pt, weight: "bold")[GP]], [#text(size: 7pt, weight: "bold")[Marks]], [#text(size: 7pt, weight: "bold")[Remarks]],
+
+      [#text(size: 7pt)[A+]], [#text(size: 7pt)[4.0]], [#text(size: 7pt)[>= 90%]], [#text(size: 7pt)[Outstanding]],
+      [#text(size: 7pt)[B]], [#text(size: 7pt)[2.8-3.1]], [#text(size: 7pt)[60-69.9%]], [#text(size: 7pt)[Good]],
+
+      [#text(size: 7pt)[A]], [#text(size: 7pt)[3.6-3.9]], [#text(size: 7pt)[80-89.9%]], [#text(size: 7pt)[Excellent]],
+      [#text(size: 7pt)[C+]], [#text(size: 7pt)[2.4-2.7]], [#text(size: 7pt)[50-59.9%]], [#text(size: 7pt)[Satisfactory]],
+
+      [#text(size: 7pt)[B+]], [#text(size: 7pt)[3.2-3.5]], [#text(size: 7pt)[70-79.9%]], [#text(size: 7pt)[Very Good]],
+      [#text(size: 7pt)[F]], [#text(size: 7pt)[0.0]], [#text(size: 7pt)[< 40%]], [#text(size: 7pt, fill: rgb("#b91c1c"))[Fail / Back]]
+    )
+
+    #v(3pt)
+    #text(size: 7pt, style: "italic", fill: rgb("#475569"))[
+      *Note:* SGPA = Total Quality Points (Sum of Cr x GP) / Total Credit Hours. Minimum pass mark in each component (theory external, internal assessment, and practical) is 40% separately. A student failing in any component is awarded an 'F' grade.
+    ]
+
+    #v(16pt)
+    #grid(
+      columns: (1fr, 1fr, 1fr),
+      align: center + bottom,
+      [
+        #line(length: 70%, stroke: 0.6pt + rgb("#0f172a"))
+        #v(2pt)
+        #text(size: 8pt, weight: "bold")[Prepared by]
+      ],
+      [
+        #line(length: 70%, stroke: 0.6pt + rgb("#0f172a"))
+        #v(2pt)
+        #text(size: 8pt, weight: "bold")[Checked by]
+      ],
+      [
+        #line(length: 70%, stroke: 0.6pt + rgb("#0f172a"))
+        #v(2pt)
+        #text(size: 8pt, weight: "bold")[Controller of Examinations]
+      ]
+    )
+
+    #v(6pt)
+    #grid(
+      columns: (1fr, 1fr),
+      [#text(size: 7.5pt, fill: rgb("#64748b"))[Date of Issue: ${cleanIssueDate} (Generated via TU Coverify • Unofficial Record)]],
+      align(right)[#text(size: 7.5pt, fill: rgb("#64748b"))[Tribhuvan University, Institute of Science & Technology]]
+    )
+  ]
+]
+        `;
+      }
+
+      // Save Typst markup to temporary file
+      const tempTypPath = path.join(tmpDir, `marksheet_${uniqueId}.typ`);
+      fs.writeFileSync(tempTypPath, typstMarkup, "utf-8");
+      tempFiles.push(tempTypPath);
+
+      const tempOutputPath = path.join(tmpDir, `marksheet_${uniqueId}.pdf`);
+      tempFiles.push(tempOutputPath);
+
+      const typstBin = await getTypstBinary();
+      const typstCmd = `"${typstBin}" compile --root / "${tempTypPath}" "${tempOutputPath}"`;
+
+      await execAsync(typstCmd, {
+        env: { PATH: process.env.PATH || "", HOME: process.env.HOME || "" } as unknown as NodeJS.ProcessEnv,
+      });
+
+      if (!fs.existsSync(tempOutputPath)) {
+        throw new Error("Marksheet compilation failed: PDF not generated");
+      }
+
+      const outputBuffer = fs.readFileSync(tempOutputPath);
+
+      return new NextResponse(outputBuffer as any, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${outputFilename}"`,
+        },
+      });
+    }
 
     // --- CASE A: LAB INDEX PAGE GENERATOR ---
     if (documentType === "index") {
