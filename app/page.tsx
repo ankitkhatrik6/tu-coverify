@@ -25,10 +25,17 @@ import {
   ArrowUp,
   ArrowDown,
   List,
-  Bell
+  Bell,
+  Sparkles,
+  Calculator
 } from "lucide-react";
 import TUNoticesSection from "@/components/TUNoticesSection";
 import LabIndexAIAssistant from "@/components/LabIndexAIAssistant";
+import TUCourseAutocomplete from "@/components/TUCourseAutocomplete";
+import TUCollegeAutocomplete from "@/components/TUCollegeAutocomplete";
+import TUGPACalculator from "@/components/TUGPACalculator";
+import { TUCourse } from "@/lib/tu-courses";
+import { TUCollege } from "@/lib/tu-colleges";
 
 interface FormData {
   collegeName: string;
@@ -129,8 +136,8 @@ const SPECIMEN_POOL: FormData[] = [
     collegeLocation: "Lainchaur, Kathmandu",
     facultyOrInstitute: "Institute of Science and Technology",
     subjectName: "Microprocessor",
-    courseCode: "CSC 167",
-    program: "BSc CSIT",
+    courseCode: "CSC167",
+    program: "B.Sc. CSIT",
     semester: "Second Semester",
     studentName: "Ankit Khatri KC",
     rollNumber: "09/82",
@@ -169,7 +176,7 @@ export default function Home() {
   const [dragActive, setDragActive] = useState<boolean>(false);
 
   // --- Document Type & Lab Index States ---
-  const [documentType, setDocumentType] = useState<"cover" | "index" | "notices">("cover");
+  const [documentType, setDocumentType] = useState<"cover" | "index" | "notices" | "calculator">("cover");
   const [indexTitle, setIndexTitle] = useState<string>("Lab Index");
   const [indexRows, setIndexRows] = useState<IndexRow[]>(DEFAULT_INDEX_ROWS);
 
@@ -271,6 +278,28 @@ export default function Home() {
   // --- Form Handlers ---
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSelectCourse = (course: TUCourse) => {
+    setFormData((prev) => ({
+      ...prev,
+      subjectName: course.title,
+      courseCode: course.code,
+      program: course.program,
+      semester: course.semesterName,
+    }));
+    if (documentType === "index" && (indexTitle === "Lab Index" || indexTitle === "")) {
+      setIndexTitle(`${course.title} Lab Index`);
+    }
+  };
+
+  const handleSelectCollege = (college: TUCollege) => {
+    setFormData((prev) => ({
+      ...prev,
+      collegeName: college.name,
+      collegeLocation: college.location,
+      facultyOrInstitute: college.facultyOrInstitute || prev.facultyOrInstitute,
+    }));
   };
 
   const handleReset = () => {
@@ -607,8 +636,8 @@ export default function Home() {
       {/* 2. Main Content Grid */}
       <main className="mx-auto mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Document Type Selector (Unified Full-Width Sub-Navigation Bar) */}
-        <div className="w-full flex rounded-xl bg-gray-200/70 p-1 dark:bg-zinc-900 shadow-inner mb-6 overflow-x-auto custom-scrollbar">
+        {/* Document Type Selector */}
+        <div className="mb-6 flex rounded-xl bg-gray-200/70 p-1 dark:bg-zinc-900 shadow-inner overflow-x-auto custom-scrollbar">
           <button
             id="tab-cover"
             onClick={() => setDocumentType("cover")}
@@ -645,12 +674,29 @@ export default function Home() {
             <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <span>TU Notices</span>
           </button>
+          <button
+            id="tab-calculator"
+            onClick={() => setDocumentType("calculator")}
+            className={`flex-1 min-w-[120px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-4 text-[11px] sm:text-sm font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+              documentType === "calculator"
+                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
+                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
+            }`}
+          >
+            <Calculator className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span>SGPA &amp; CGPA</span>
+          </button>
         </div>
 
         {documentType === "notices" ? (
           <div className="space-y-6">
             {/* Full Width TU Notices Section */}
             <TUNoticesSection />
+          </div>
+        ) : documentType === "calculator" ? (
+          <div className="space-y-6">
+            {/* Full Width TU CSIT SGPA and CGPA Calculator */}
+            <TUGPACalculator />
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
@@ -698,14 +744,16 @@ export default function Home() {
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">College Name</label>
-                          <input
-                            id="college-name-input"
-                            type="text"
-                            value={formData.collegeName}
-                            onChange={(e) => handleInputChange("collegeName", e.target.value)}
-                            className="mt-1.5 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:bg-white focus:border-black focus:ring-2 focus:ring-black/5 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-neutral-100 dark:placeholder:text-zinc-600 dark:focus:bg-zinc-950 dark:focus:border-white dark:focus:ring-white/5 transition-all"
-                            placeholder="e.g. Amrit Science Campus"
-                          />
+                          <div className="mt-1.5">
+                            <TUCollegeAutocomplete
+                              id="college-name-input"
+                              value={formData.collegeName}
+                              onChange={(val) => handleInputChange("collegeName", val)}
+                              onSelectCollege={handleSelectCollege}
+                              className="w-full rounded-lg border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:bg-white focus:border-black focus:ring-2 focus:ring-black/5 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-neutral-100 dark:placeholder:text-zinc-600 dark:focus:bg-zinc-950 dark:focus:border-white dark:focus:ring-white/5 transition-all"
+                              placeholder="e.g. Amrit Science Campus"
+                            />
+                          </div>
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">College Location</label>
@@ -727,27 +775,35 @@ export default function Home() {
                         <div className="h-4 w-1 rounded-full bg-black dark:bg-white" />
                         <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">2. Subject Details</h4>
                       </div>
+
                       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="sm:col-span-2">
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">Subject Name</label>
-                          <input
-                            id="subject-name-input"
-                            type="text"
-                            value={formData.subjectName}
-                            onChange={(e) => handleInputChange("subjectName", e.target.value)}
-                            className="mt-1.5 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:bg-white focus:border-black focus:ring-2 focus:ring-black/5 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-neutral-100 dark:placeholder:text-zinc-600 dark:focus:bg-zinc-950 dark:focus:border-white dark:focus:ring-white/5 transition-all"
-                            placeholder="e.g. Microprocessor"
-                          />
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">
+                            Subject Name
+                          </label>
+                          <div className="mt-1.5">
+                            <TUCourseAutocomplete
+                              id="subject-name-input"
+                              value={formData.subjectName}
+                              onChange={(val) => handleInputChange("subjectName", val)}
+                              onSelectCourse={handleSelectCourse}
+                              searchType="title"
+                              placeholder="e.g. Microprocessor, C Programming, Discrete Structure..."
+                              className="w-full rounded-lg border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:bg-white focus:border-black focus:ring-2 focus:ring-black/5 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-neutral-100 dark:placeholder:text-zinc-600 dark:focus:bg-zinc-950 dark:focus:border-white dark:focus:ring-white/5 transition-all"
+                            />
+                          </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">Course Code</label>
+                          <label className="block text-xs font-semibold text-gray-700 dark:text-neutral-300">
+                            Course Code
+                          </label>
                           <input
                             id="course-code-input"
                             type="text"
                             value={formData.courseCode}
                             onChange={(e) => handleInputChange("courseCode", e.target.value)}
                             className="mt-1.5 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:bg-white focus:border-black focus:ring-2 focus:ring-black/5 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-neutral-100 dark:placeholder:text-zinc-600 dark:focus:bg-zinc-950 dark:focus:border-white dark:focus:ring-white/5 transition-all"
-                            placeholder="e.g. CSC 167"
+                            placeholder="e.g. CSC167"
                           />
                         </div>
                         <div>
@@ -758,7 +814,7 @@ export default function Home() {
                             value={formData.program}
                             onChange={(e) => handleInputChange("program", e.target.value)}
                             className="mt-1.5 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-3.5 py-2 text-sm text-gray-950 placeholder:text-gray-400 focus:bg-white focus:border-black focus:ring-2 focus:ring-black/5 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-neutral-100 dark:placeholder:text-zinc-600 dark:focus:bg-zinc-950 dark:focus:border-white dark:focus:ring-white/5 transition-all"
-                            placeholder="e.g. BSc CSIT"
+                            placeholder="e.g. B.Sc. CSIT"
                           />
                         </div>
                       </div>
