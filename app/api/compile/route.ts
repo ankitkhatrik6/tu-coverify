@@ -89,7 +89,9 @@ export async function POST(req: NextRequest) {
         .replace(/\]/g, "\\]")
         .replace(/"/g, '\\"')
         .replace(/#/g, "\\#")
-        .replace(/\$/g, "\\$");
+        .replace(/\$/g, "\\$")
+        .replace(/\*/g, "\\*")
+        .replace(/_/g, "\\_");
     };
 
     // --- CASE C: MARKSHEET GENERATOR (TU IOST OFFICIAL FORMAT) ---
@@ -841,10 +843,7 @@ ${buildStudentPageMarkup(student)}
       const rowsMarkup = indexRows && indexRows.length > 0
         ? indexRows
             .map((row: any) => {
-              const cleanTitle = (row.title || "")
-                .replace(/\\/g, "\\\\")
-                .replace(/\[/g, "\\[")
-                .replace(/\]/g, "\\]");
+              const cleanTitle = escapeTypst(row.title || "");
               return `[${row.sn || ""}], [${cleanTitle}], [${row.date || ""}], [${row.signature || ""}]`;
             })
             .join(",\n  ")
