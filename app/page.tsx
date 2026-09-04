@@ -27,13 +27,15 @@ import {
   List,
   Bell,
   Sparkles,
-  Calculator
+  Calculator,
+  Users
 } from "lucide-react";
 import TUNoticesSection from "@/components/TUNoticesSection";
 import LabIndexAIAssistant from "@/components/LabIndexAIAssistant";
 import TUCourseAutocomplete from "@/components/TUCourseAutocomplete";
 import TUCollegeAutocomplete from "@/components/TUCollegeAutocomplete";
 import TUGPACalculator from "@/components/TUGPACalculator";
+import CRBulkCoverGenerator from "@/components/CRBulkCoverGenerator";
 import { TUCourse } from "@/lib/tu-courses";
 import { TUCollege } from "@/lib/tu-colleges";
 
@@ -176,7 +178,7 @@ export default function Home() {
   const [dragActive, setDragActive] = useState<boolean>(false);
 
   // --- Document Type & Lab Index States ---
-  const [documentType, setDocumentType] = useState<"cover" | "index" | "notices" | "calculator">("cover");
+  const [documentType, setDocumentType] = useState<"cover" | "index" | "notices" | "calculator" | "batch">("cover");
   const [indexTitle, setIndexTitle] = useState<string>("Lab Index");
   const [indexRows, setIndexRows] = useState<IndexRow[]>(DEFAULT_INDEX_ROWS);
 
@@ -218,7 +220,7 @@ export default function Home() {
 
   // --- Typst Preview Compiler ---
   const compilePreview = useCallback(async () => {
-    if (documentType === "notices") return;
+    if (documentType === "notices" || documentType === "calculator" || documentType === "batch") return;
     setCompiling(true);
     setCompileError("");
     try {
@@ -589,7 +591,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen pb-12 transition-colors duration-300 bg-[#F9FAFB] dark:bg-zinc-950 font-sans text-[#111827] dark:text-neutral-50">
+    <div className="min-h-screen pb-24 sm:pb-12 transition-colors duration-300 bg-[#F9FAFB] dark:bg-zinc-950 font-sans text-[#111827] dark:text-neutral-50">
       
       {/* 1. Header / Navigation */}
       <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/95 dark:border-zinc-800/80 dark:bg-zinc-950/95 backdrop-blur-md">
@@ -636,8 +638,8 @@ export default function Home() {
       {/* 2. Main Content Grid */}
       <main className="mx-auto mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Document Type Selector */}
-        <div className="mb-6 flex rounded-xl bg-gray-200/70 p-1 dark:bg-zinc-900 shadow-inner overflow-x-auto custom-scrollbar">
+        {/* Document Type Selector (Desktop/Tablet) */}
+        <div className="mb-6 hidden sm:flex rounded-xl bg-gray-200/70 p-1 dark:bg-zinc-900 shadow-inner overflow-x-auto custom-scrollbar">
           <button
             id="tab-cover"
             onClick={() => setDocumentType("cover")}
@@ -649,6 +651,18 @@ export default function Home() {
           >
             <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <span>Cover Page</span>
+          </button>
+          <button
+            id="tab-batch"
+            onClick={() => setDocumentType("batch")}
+            className={`flex-1 min-w-[120px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-4 text-[11px] sm:text-sm font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+              documentType === "batch"
+                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
+                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
+            }`}
+          >
+            <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span>Bulk Cover</span>
           </button>
           <button
             id="tab-index"
@@ -663,18 +677,6 @@ export default function Home() {
             <span>Lab Index</span>
           </button>
           <button
-            id="tab-notices"
-            onClick={() => setDocumentType("notices")}
-            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-4 text-[11px] sm:text-sm font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
-              documentType === "notices"
-                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
-                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
-            }`}
-          >
-            <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-            <span>TU Notices</span>
-          </button>
-          <button
             id="tab-calculator"
             onClick={() => setDocumentType("calculator")}
             className={`flex-1 min-w-[120px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-4 text-[11px] sm:text-sm font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
@@ -685,6 +687,18 @@ export default function Home() {
           >
             <Calculator className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <span>SGPA &amp; CGPA</span>
+          </button>
+          <button
+            id="tab-notices"
+            onClick={() => setDocumentType("notices")}
+            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-2 sm:px-4 text-[11px] sm:text-sm font-semibold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+              documentType === "notices"
+                ? "bg-white text-gray-950 shadow-sm dark:bg-zinc-800 dark:text-white"
+                : "text-gray-500 hover:text-gray-950 dark:text-neutral-400 dark:hover:text-white"
+            }`}
+          >
+            <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span>TU Notices</span>
           </button>
         </div>
 
@@ -697,6 +711,38 @@ export default function Home() {
           <div className="space-y-6">
             {/* Full Width TU CSIT SGPA and CGPA Calculator */}
             <TUGPACalculator />
+          </div>
+        ) : documentType === "batch" ? (
+          <div className="space-y-6">
+            {/* Full Width CR / Class Representative Bulk Generator */}
+            <CRBulkCoverGenerator
+              initialClassInfo={{
+                collegeName: formData.collegeName || "Amrit Science Campus",
+                collegeLocation: formData.collegeLocation || "Lainchaur, Kathmandu",
+                facultyOrInstitute: formData.facultyOrInstitute || "Institute of Science and Technology",
+                subjectName: formData.subjectName || "Microprocessor",
+                courseCode: formData.courseCode || "CSC 167",
+                program: formData.program || "B.Sc. CSIT",
+                semester: formData.semester || "Second Semester",
+                batch: formData.batch || "2082",
+                teacherName: formData.teacherName || "Mr. Kiran Joshi",
+                teacherDepartment: formData.teacherDepartment || "Department of CSIT",
+                logoBase64: logoBase64 || undefined,
+              }}
+              onSyncWithSingle={() => ({
+                collegeName: formData.collegeName,
+                collegeLocation: formData.collegeLocation,
+                facultyOrInstitute: formData.facultyOrInstitute,
+                subjectName: formData.subjectName,
+                courseCode: formData.courseCode,
+                program: formData.program,
+                semester: formData.semester,
+                batch: formData.batch,
+                teacherName: formData.teacherName,
+                teacherDepartment: formData.teacherDepartment,
+                logoBase64: logoBase64 || undefined,
+              })}
+            />
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
@@ -719,6 +765,15 @@ export default function Home() {
                       <FileText className="h-4 w-4 text-gray-500" />
                       <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400">Cover Page Fields</h3>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setDocumentType("batch")}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1 text-[11px] font-semibold text-gray-700 hover:border-black hover:bg-white dark:border-zinc-800 dark:bg-zinc-800 dark:text-neutral-200 dark:hover:border-zinc-600 transition-colors shadow-2xs cursor-pointer"
+                      title="Generate for entire class with a CSV spreadsheet"
+                    >
+                      <Users className="h-3 w-3" />
+                      <span>Bulk Cover</span>
+                    </button>
                   </div>
 
                   {/* Form Layout: Grouped Sections */}
@@ -1363,6 +1418,165 @@ export default function Home() {
         )}
 
       </main>
+
+      {/* 3. Mobile App Bottom Navigation (Only Mobile View) */}
+      <nav
+        id="mobile-bottom-nav"
+        aria-label="Mobile Navigation"
+        className="fixed bottom-0 left-0 right-0 z-50 sm:hidden border-t border-gray-200/90 bg-white/95 backdrop-blur-lg dark:border-zinc-800/90 dark:bg-zinc-950/95 pt-1.5 pb-[max(env(safe-area-inset-bottom,0px),0.5rem)] px-1.5 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.4)]"
+      >
+        <div className="grid grid-cols-5 items-center max-w-md mx-auto">
+          {/* Cover Page */}
+          <button
+            id="mobile-nav-cover"
+            type="button"
+            onClick={() => {
+              setDocumentType("cover");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="flex flex-col items-center justify-center gap-1 py-1 active:scale-95 transition-transform cursor-pointer"
+          >
+            <div
+              className={`flex items-center justify-center w-11 h-7 rounded-full transition-all duration-200 ${
+                documentType === "cover"
+                  ? "bg-black text-white dark:bg-white dark:text-black shadow-xs"
+                  : "text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              <FileText className="h-4 w-4 shrink-0" />
+            </div>
+            <span
+              className={`text-[10px] tracking-tight leading-none ${
+                documentType === "cover"
+                  ? "font-bold text-black dark:text-white"
+                  : "font-medium text-gray-500 dark:text-neutral-400"
+              }`}
+            >
+              Cover Page
+            </span>
+          </button>
+
+          {/* Bulk Cover */}
+          <button
+            id="mobile-nav-batch"
+            type="button"
+            onClick={() => {
+              setDocumentType("batch");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="flex flex-col items-center justify-center gap-1 py-1 active:scale-95 transition-transform cursor-pointer"
+          >
+            <div
+              className={`flex items-center justify-center w-11 h-7 rounded-full transition-all duration-200 ${
+                documentType === "batch"
+                  ? "bg-black text-white dark:bg-white dark:text-black shadow-xs"
+                  : "text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              <Users className="h-4 w-4 shrink-0" />
+            </div>
+            <span
+              className={`text-[10px] tracking-tight leading-none ${
+                documentType === "batch"
+                  ? "font-bold text-black dark:text-white"
+                  : "font-medium text-gray-500 dark:text-neutral-400"
+              }`}
+            >
+              Bulk Cover
+            </span>
+          </button>
+
+          {/* Lab Index */}
+          <button
+            id="mobile-nav-index"
+            type="button"
+            onClick={() => {
+              setDocumentType("index");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="flex flex-col items-center justify-center gap-1 py-1 active:scale-95 transition-transform cursor-pointer"
+          >
+            <div
+              className={`flex items-center justify-center w-11 h-7 rounded-full transition-all duration-200 ${
+                documentType === "index"
+                  ? "bg-black text-white dark:bg-white dark:text-black shadow-xs"
+                  : "text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              <List className="h-4 w-4 shrink-0" />
+            </div>
+            <span
+              className={`text-[10px] tracking-tight leading-none ${
+                documentType === "index"
+                  ? "font-bold text-black dark:text-white"
+                  : "font-medium text-gray-500 dark:text-neutral-400"
+              }`}
+            >
+              Lab Index
+            </span>
+          </button>
+
+          {/* SGPA & CGPA */}
+          <button
+            id="mobile-nav-calculator"
+            type="button"
+            onClick={() => {
+              setDocumentType("calculator");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="flex flex-col items-center justify-center gap-1 py-1 active:scale-95 transition-transform cursor-pointer"
+          >
+            <div
+              className={`flex items-center justify-center w-11 h-7 rounded-full transition-all duration-200 ${
+                documentType === "calculator"
+                  ? "bg-black text-white dark:bg-white dark:text-black shadow-xs"
+                  : "text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              <Calculator className="h-4 w-4 shrink-0" />
+            </div>
+            <span
+              className={`text-[10px] tracking-tight leading-none whitespace-nowrap ${
+                documentType === "calculator"
+                  ? "font-bold text-black dark:text-white"
+                  : "font-medium text-gray-500 dark:text-neutral-400"
+              }`}
+            >
+              SGPA &amp; CGPA
+            </span>
+          </button>
+
+          {/* TU Notices */}
+          <button
+            id="mobile-nav-notices"
+            type="button"
+            onClick={() => {
+              setDocumentType("notices");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="flex flex-col items-center justify-center gap-1 py-1 active:scale-95 transition-transform cursor-pointer"
+          >
+            <div
+              className={`flex items-center justify-center w-11 h-7 rounded-full transition-all duration-200 ${
+                documentType === "notices"
+                  ? "bg-black text-white dark:bg-white dark:text-black shadow-xs"
+                  : "text-gray-500 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              <Bell className="h-4 w-4 shrink-0" />
+            </div>
+            <span
+              className={`text-[10px] tracking-tight leading-none ${
+                documentType === "notices"
+                  ? "font-bold text-black dark:text-white"
+                  : "font-medium text-gray-500 dark:text-neutral-400"
+              }`}
+            >
+              TU Notices
+            </span>
+          </button>
+        </div>
+      </nav>
 
     </div>
   );
