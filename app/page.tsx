@@ -244,8 +244,13 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.details || "Failed to render preview");
+        let errData: any = {};
+        try {
+          errData = await response.json();
+        } catch (e) {
+          errData = { details: `Server error: ${response.statusText || response.status}` };
+        }
+        throw new Error(errData.details || errData.error || "Failed to render preview");
       }
 
       const blob = await response.blob();

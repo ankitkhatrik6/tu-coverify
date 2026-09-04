@@ -313,8 +313,9 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.details || "Failed to render sample preview");
+        let err: any = {};
+        try { err = await res.json(); } catch(e) { err = { details: `Server error: ${res.statusText || res.status}` }; }
+        throw new Error(err.details || err.error || "Failed to render sample preview");
       }
 
       let svgText = await res.text();
@@ -355,8 +356,9 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.details || "Failed to generate combined PDF");
+        let err: any = {};
+        try { err = await res.json(); } catch(e) { err = { details: `Server error: ${res.statusText || res.status}` }; }
+        throw new Error(err.details || err.error || "Failed to generate combined PDF");
       }
 
       const blob = await res.blob();
@@ -407,8 +409,9 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.details || "Failed to package ZIP");
+        let err: any = {};
+        try { err = await res.json(); } catch(e) { err = { details: `Server error: ${res.statusText || res.status}` }; }
+        throw new Error(err.details || err.error || "Failed to package ZIP");
       }
 
       const blob = await res.blob();
