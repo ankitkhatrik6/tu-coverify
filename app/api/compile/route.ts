@@ -9,6 +9,7 @@ import os from "os";
 import { generateDocx } from "@/lib/docx-generator";
 import { generateIndexDocx } from "@/lib/docx-index-generator";
 import { getTypstBinary } from "@/lib/typst";
+import JSZip from "jszip";
 
 // Disable HMR/Watch options for API-based temporary files
 export const dynamic = "force-dynamic";
@@ -70,6 +71,11 @@ export async function POST(req: NextRequest) {
       marksheetHasBacklog = false,
       campusName = "Amrit Science Campus, Lainchaur, Kathmandu",
       issueDate = "",
+
+      // Batch Cover Generator properties
+      batchFormat = "combined_pdf", // "combined_pdf" | "zip" | "preview"
+      students = [],
+      previewIndex = 0,
 
       format = "pdf",
     } = data;
@@ -512,6 +518,305 @@ export async function POST(req: NextRequest) {
           "Content-Disposition": `attachment; filename="${outputFilename}"`,
         },
       });
+    }
+
+    // --- CASE D: CR / CLASS REPRESENTATIVE BULK COVER PAGE GENERATOR ---
+    if (documentType === "batch_cover") {
+      const studentList = Array.isArray(students) ? students : [];
+      if (studentList.length === 0) {
+        return NextResponse.json(
+          { error: "No students provided", details: "Roster is empty. Please provide student details." },
+          { status: 400 }
+        );
+      }
+
+      // 1. Resolve College Logo File
+      let collegeLogoPath = path.join(process.cwd(), "public", "default_college_logo.svg").replace(/\\/g, "/");
+      if (logoBase64) {
+        try {
+          const matches = logoBase64.match(/^data:([^;]+);base64,(.*)$/);
+          let mimeType = "image/png";
+          let base64Data = logoBase64;
+          if (matches && matches.length === 3) {
+            mimeType = matches[1];
+            base64Data = matches[2];
+          } else {
+            base64Data = logoBase64.replace(/^data:[^;]+;base64,/, "");
+          }
+          const logoBuffer = Buffer.from(base64Data, "base64");
+          let extension = "png";
+          if (mimeType.includes("svg")) {
+            extension = "svg";
+          } else if (mimeType.includes("jpeg") || mimeType.includes("jpg")) {
+            extension = "jpg";
+          } else if (mimeType.includes("webp")) {
+            extension = "webp";
+          }
+          const logoFilename = `batch_logo_${uniqueId}.${extension}`;
+          const logoFullPath = path.join(uploadDir, logoFilename).replace(/\\/g, "/");
+          fs.writeFileSync(logoFullPath, logoBuffer);
+          tempFiles.push(logoFullPath);
+          collegeLogoPath = logoFullPath;
+        } catch (err) {
+          console.error("Failed to save custom logo for batch:", err);
+          collegeLogoPath = path.join(process.cwd(), "public", "default_college_logo.svg").replace(/\\/g, "/");
+        }
+      }
+
+      const tuLogoPath = path.join(process.cwd(), "public", "tu_logo.svg").replace(/\\/g, "/");
+      const cleanCollege = escapeTypst(collegeName || "Tribhuvan University Affiliated College");
+      const cleanLocation = escapeTypst(collegeLocation || "Kathmandu, Nepal");
+      const cleanFaculty = escapeTypst(facultyOrInstitute || "Institute of Science and Technology");
+      const cleanSubject = escapeTypst(subjectName || "Computer Science");
+      const cleanCode = escapeTypst(courseCode || "CSC");
+      const cleanProgram = escapeTypst(program || "B.Sc. CSIT");
+      const cleanSemester = escapeTypst(semester || "First Semester");
+      const cleanBatch = escapeTypst(batch || "2082");
+      const cleanTeacher = escapeTypst(teacherName || "Subject Teacher");
+      const cleanDepartment = escapeTypst(teacherDepartment || "Department of Computer Science");
+
+      const buildStudentPageMarkup = (student: any) => {
+        const sName = escapeTypst(student.name || "Student Name");
+        const sRoll = escapeTypst(student.rollNumber || "");
+        const sRegd = escapeTypst(student.regdNumber || "");
+        const sExamRoll = escapeTypst(student.examRollNumber || student.rollNumber || "");
+
+        return `
+// Header Section (Three-column layout for logos and text)
+#grid(
+  columns: (1fr, 3.2fr, 1fr),
+  align: (center + horizon, center + horizon, center + horizon),
+  image("${tuLogoPath}", width: 62pt),
+  [
+    #set text(weight: "regular")
+    #v(3pt)
+    #text(size: 16pt)[Tribhuvan University] \\
+    #v(3pt)
+    #text(size: 15pt)[${cleanFaculty}] \\
+    #v(6pt)
+    #text(size: 20pt, weight: "bold")[${cleanCollege}] \\
+    #v(3pt)
+    #text(size: 13pt)[${cleanLocation}]
+  ],
+  image("${collegeLogoPath}", width: 62pt)
+)
+
+#v(22pt)
+
+// Center Divider (Trishul)
+#align(center)[
+  #box(height: 160pt)[
+    #align(horizon)[
+      #stack(
+        dir: ltr,
+        spacing: 16pt,
+        rect(width: 4pt, height: 105pt, fill: black),
+        rect(width: 6.5pt, height: 160pt, fill: black),
+        rect(width: 4pt, height: 105pt, fill: black)
+      )
+    ]
+  ]
+]
+
+#v(24pt)
+
+// Report Details
+#align(center)[
+  #text(size: 18pt, weight: "bold")[Lab Report] \\
+  #v(5pt)
+  #text(size: 16pt, weight: "bold")[${cleanSubject}] \\
+  #v(2pt)
+  #text(size: 15pt, weight: "bold")[(${cleanCode})] \\
+  #v(5pt)
+  #text(size: 16pt, weight: "bold")[${cleanProgram} ${cleanSemester}]
+]
+
+#v(45pt)
+
+// Bottom Section (Submitted by & Submitted to)
+#grid(
+  columns: (1.25fr, 1fr),
+  gutter: 15pt,
+  align: (left, top),
+  [
+    #text(size: 15pt, weight: "bold")[Submitted by :] \\
+    #v(10pt)
+    #stack(
+      spacing: 9pt,
+      [#text(weight: "bold")[Name:] ${sName}],
+      [#text(weight: "bold")[Roll no.:] ${sRoll}],
+      [#text(weight: "bold")[Semester:] ${cleanSemester}],
+      [#text(weight: "bold")[Batch:] ${cleanBatch}],
+      [#text(weight: "bold")[Regd. No:] ${sRegd}],
+      [#text(weight: "bold")[Exam Roll No:] ${sExamRoll}]
+    )
+  ],
+  [
+    #text(size: 15pt, weight: "bold")[Submitted to :] \\
+    #v(45pt)
+    #line(length: 95%, stroke: 1.5pt + black)
+    #v(6pt)
+    #stack(
+      spacing: 9pt,
+      [#text(size: 14pt)[${cleanTeacher}]],
+      [#text(size: 14pt)[${cleanDepartment}]]
+    )
+  ]
+)
+`;
+      };
+
+      const typstBin = await getTypstBinary();
+      const safeCourse = (courseCode || subjectName || "Batch").replace(/[^a-zA-Z0-9_-]/g, "_");
+      const safeSem = (semester || "Class").replace(/[^a-zA-Z0-9_-]/g, "_");
+
+      // OPTION 1: PREVIEW MODE (Single page vector SVG for instant review)
+      if (batchFormat === "preview") {
+        const targetStudent = studentList[previewIndex] || studentList[0];
+        const previewTypst = `
+#set page(
+  paper: "a4",
+  margin: (top: 1in, bottom: 1in, left: 1in, right: 1in)
+)
+
+#set text(
+  font: ("Liberation Serif", "Nimbus Roman"),
+  fill: rgb("#000000"),
+  size: 14pt
+)
+
+${buildStudentPageMarkup(targetStudent)}
+`;
+        const tempTypPath = path.join(tmpDir, `batch_prev_${uniqueId}.typ`);
+        fs.writeFileSync(tempTypPath, previewTypst, "utf-8");
+        tempFiles.push(tempTypPath);
+
+        const tempSvgPath = path.join(tmpDir, `batch_prev_${uniqueId}.svg`);
+        tempFiles.push(tempSvgPath);
+
+        const cmd = `"${typstBin}" compile --root / "${tempTypPath}" "${tempSvgPath}"`;
+        await execAsync(cmd, {
+          env: { PATH: process.env.PATH || "", HOME: process.env.HOME || "" } as unknown as NodeJS.ProcessEnv,
+        });
+
+        if (!fs.existsSync(tempSvgPath)) {
+          throw new Error("Batch preview generation failed");
+        }
+
+        const svgContent = fs.readFileSync(tempSvgPath);
+        return new NextResponse(svgContent as any, {
+          headers: {
+            "Content-Type": "image/svg+xml",
+            "Content-Disposition": "inline",
+          },
+        });
+      }
+
+      // OPTION 2: COMBINED MULTI-PAGE PDF (Single file, 1 cover page per student)
+      if (batchFormat === "combined_pdf") {
+        const pagesMarkup = studentList.map((st: any) => buildStudentPageMarkup(st)).join("\n#pagebreak()\n");
+        const combinedTypst = `
+#set page(
+  paper: "a4",
+  margin: (top: 1in, bottom: 1in, left: 1in, right: 1in)
+)
+
+#set text(
+  font: ("Liberation Serif", "Nimbus Roman"),
+  fill: rgb("#000000"),
+  size: 14pt
+)
+
+${pagesMarkup}
+`;
+        const tempTypPath = path.join(tmpDir, `batch_all_${uniqueId}.typ`);
+        fs.writeFileSync(tempTypPath, combinedTypst, "utf-8");
+        tempFiles.push(tempTypPath);
+
+        const tempPdfPath = path.join(tmpDir, `batch_all_${uniqueId}.pdf`);
+        tempFiles.push(tempPdfPath);
+
+        const cmd = `"${typstBin}" compile --root / "${tempTypPath}" "${tempPdfPath}"`;
+        await execAsync(cmd, {
+          env: { PATH: process.env.PATH || "", HOME: process.env.HOME || "" } as unknown as NodeJS.ProcessEnv,
+        });
+
+        if (!fs.existsSync(tempPdfPath)) {
+          throw new Error("Batch combined PDF compilation failed");
+        }
+
+        const pdfBuffer = fs.readFileSync(tempPdfPath);
+        const combinedFilename = `TU_Cover_Batch_${safeCourse}_${safeSem}_Combined_${studentList.length}_Students.pdf`;
+
+        return new NextResponse(pdfBuffer as any, {
+          headers: {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename="${combinedFilename}"`,
+          },
+        });
+      }
+
+      // OPTION 3: ZIP OF INDIVIDUAL PDF FILES (One distinct PDF file per student)
+      if (batchFormat === "zip") {
+        const zip = new JSZip();
+        const concurrency = 6;
+
+        for (let i = 0; i < studentList.length; i += concurrency) {
+          const chunk = studentList.slice(i, i + concurrency);
+          await Promise.all(
+            chunk.map(async (student: any, cIdx: number) => {
+              const studentIndex = i + cIdx + 1;
+              const singleTypst = `
+#set page(
+  paper: "a4",
+  margin: (top: 1in, bottom: 1in, left: 1in, right: 1in)
+)
+
+#set text(
+  font: ("Liberation Serif", "Nimbus Roman"),
+  fill: rgb("#000000"),
+  size: 14pt
+)
+
+${buildStudentPageMarkup(student)}
+`;
+              const sTypPath = path.join(tmpDir, `bzip_${uniqueId}_${studentIndex}.typ`);
+              const sPdfPath = path.join(tmpDir, `bzip_${uniqueId}_${studentIndex}.pdf`);
+              fs.writeFileSync(sTypPath, singleTypst, "utf-8");
+              tempFiles.push(sTypPath);
+              tempFiles.push(sPdfPath);
+
+              const cmd = `"${typstBin}" compile --root / "${sTypPath}" "${sPdfPath}"`;
+              await execAsync(cmd, {
+                env: { PATH: process.env.PATH || "", HOME: process.env.HOME || "" } as unknown as NodeJS.ProcessEnv,
+              });
+
+              if (fs.existsSync(sPdfPath)) {
+                const pdfData = fs.readFileSync(sPdfPath);
+                const safeNum = String(studentIndex).padStart(2, "0");
+                const safeRoll = (student.rollNumber || "NoRoll").replace(/[\/\\:\*\?"<>\|]/g, "-").trim();
+                const safeName = (student.name || `Student_${studentIndex}`).replace(/[^a-zA-Z0-9_-]/g, "_").trim();
+                const individualFilename = `${safeNum}_${safeRoll}_${safeName}.pdf`;
+                zip.file(individualFilename, pdfData);
+              }
+            })
+          );
+        }
+
+        const zipBuffer = await zip.generateAsync({
+          type: "nodebuffer",
+          compression: "DEFLATE",
+          compressionOptions: { level: 6 },
+        });
+
+        const zipFilename = `TU_Cover_Batch_${safeCourse}_${safeSem}_${studentList.length}_Students.zip`;
+        return new NextResponse(zipBuffer as any, {
+          headers: {
+            "Content-Type": "application/zip",
+            "Content-Disposition": `attachment; filename="${zipFilename}"`,
+          },
+        });
+      }
     }
 
     // --- CASE A: LAB INDEX PAGE GENERATOR ---
