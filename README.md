@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📄 TU Coverify
+# TU Coverify
 
 **Stop wasting time formatting lab report documents.**  
 Generate pixel-perfect, print-ready **Tribhuvan University** cover pages and lab indexes in seconds — with live preview, multiple export formats, and your college logo.
@@ -21,7 +21,7 @@ Generate pixel-perfect, print-ready **Tribhuvan University** cover pages and lab
 
 ---
 
-## ✨ What is this?
+## What is this?
 
 TU Coverify is a web app I built to solve a problem every TU student faces — spending 20+ minutes reformatting a Word document just to get a properly aligned cover page. This tool generates the **exact official TU lab report cover page layout and lab index tables** using the Typst typesetting engine, with real-time preview and one-click export.
 
@@ -29,20 +29,20 @@ Fill in your details → preview instantly → download. That's it.
 
 ---
 
-## 🚀 Features
+## Features
 
-- ⚡ **Real-time live preview** — Document renders as you type with an optimized asynchronous Typst engine
-- 📑 **Lab Index Generator** — Generate dynamic multi-row lab indexes with reorderable lists
-- 📥 **5 export formats** — PDF, DOCX, PNG, JPG, and raw Typst source
-- 🏫 **College logo upload** — Drag & drop your college logo (PNG, JPG, SVG)
-- 🌙 **Dark mode** — Full light/dark theme with localStorage persistence
-- 📐 **Standard A4 layout** — Portrait orientation, Times New Roman, metric-perfect spacing
-- 🚀 **SEO Optimized** — Professional OpenGraph and Twitter meta tags for perfect link sharing
-- 🖨️ **Direct print** — Print the PDF straight from the browser
+- **Real-time live preview** — Document renders as you type with an optimized asynchronous Typst engine
+- **Lab Index Generator** — Generate dynamic multi-row lab indexes with reorderable lists
+- **5 export formats** — PDF, DOCX, PNG, JPG, and raw Typst source
+- **College logo upload** — Drag & drop your college logo (PNG, JPG, SVG)
+- **Dark mode** — Full light/dark theme with localStorage persistence
+- **Standard A4 layout** — Portrait orientation, Times New Roman, metric-perfect spacing
+- **SEO Optimized** — Professional OpenGraph and Twitter meta tags for perfect link sharing
+- **Direct print** — Print the PDF straight from the browser
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -56,7 +56,7 @@ Fill in your details → preview instantly → download. That's it.
 
 ---
 
-## 📦 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -100,31 +100,7 @@ The included Typst binary is packaged appropriately for Vercel's serverless func
 
 ---
 
-## 📁 Project Structure
-
-```
-tu-coverify/
-├── app/
-│   ├── api/compile/      # Typst compilation API route
-│   ├── page.tsx          # Main application UI
-│   ├── layout.tsx        # Root layout & metadata
-│   └── globals.css       # Global styles
-├── bin/
-│   └── typst             # Typst binary (self-hosted)
-├── lib/
-│   ├── docx-generator.ts       # DOCX export engine for Cover Pages
-│   ├── docx-index-generator.ts # DOCX export engine for Lab Index
-│   └── utils.ts                # Utility helpers
-├── public/
-│   ├── default_college_logo.svg
-│   └── tu_logo.svg
-└── hooks/
-    └── use-mobile.ts
-```
-
----
-
-## 📸 Preview
+## Preview
 
 > Real-time compilation — what you fill in is exactly what gets printed.
 
@@ -132,7 +108,7 @@ The live preview panel renders a full SVG of your cover page within ~450ms of ea
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Found a bug or want to add a feature? Feel free to open an issue or submit a PR.
 
@@ -143,7 +119,7 @@ Found a bug or want to add a feature? Feel free to open an issue or submit a PR.
 
 ---
 
-## 📄 License
+## License
 
 This project is open-source and available under the [MIT License](LICENSE).
 
