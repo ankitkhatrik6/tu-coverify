@@ -1,4 +1,6 @@
 <div align="center">
+  
+<img src="./public/logo.png" alt="TU Coverify Logo" width="100">
 
 # TU Coverify
 
