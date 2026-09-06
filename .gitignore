@@ -1,11 +1,23 @@
+# Dependencies and build output
 node_modules/
 .next/
+.vercel/
 coverage/
+*.tsbuildinfo
+
+# Local files and secrets
+.env*
+!.env.example
 .DS_Store
 *.log
-.env*
-# bin/ — included for Vercel/Render deployment (Typst binary)
+
+# Runtime-generated files
 public/uploads/
 *.typ
 *.pdf
-# Environment variables
+
+# Non-Vercel Firebase/development artifacts
+/firebase-applet-config.json
+/firebase-blueprint.json
+/firestore.rules
+/security_spec.md
