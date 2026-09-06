@@ -11,6 +11,7 @@ interface TUCollegeAutocompleteProps {
   onChange: (value: string) => void;
   onSelectCollege: (college: TUCollege) => void;
   className?: string;
+  icon?: React.ReactNode;
 }
 
 export default function TUCollegeAutocomplete({
@@ -20,6 +21,7 @@ export default function TUCollegeAutocomplete({
   onChange,
   onSelectCollege,
   className = "",
+  icon,
 }: TUCollegeAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
@@ -75,6 +77,11 @@ export default function TUCollegeAutocomplete({
   return (
     <div ref={containerRef} className="relative w-full">
       <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-2.5 flex items-center justify-center text-neutral-400 dark:text-zinc-500 pointer-events-none z-10">
+            {icon}
+          </div>
+        )}
         <input
           id={id}
           ref={inputRef}

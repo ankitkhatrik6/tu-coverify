@@ -26,9 +26,9 @@ import {
   ArrowDown,
   List,
   Bell,
-  Sparkles,
   Calculator,
-  Users
+  Users,
+  UserCheck
 } from "lucide-react";
 import TUNoticesSection from "@/components/TUNoticesSection";
 import LabIndexAIAssistant from "@/components/LabIndexAIAssistant";
@@ -38,6 +38,9 @@ import TUGPACalculator from "@/components/TUGPACalculator";
 import CRBulkCoverGenerator from "@/components/CRBulkCoverGenerator";
 import { TUCourse } from "@/lib/tu-courses";
 import { TUCollege } from "@/lib/tu-colleges";
+import { useAuth } from "@/context/AuthContext";
+import { StudentAcademicDetails } from "@/lib/firebase";
+import AuthHeaderWidget from "@/components/AuthHeaderWidget";
 
 interface FormData {
   collegeName: string;
@@ -169,6 +172,13 @@ const EMPTY_DEFAULTS: FormData = {
 };
 
 export default function Home() {
+  const {
+    user,
+    userProfile,
+    setShowProfileModal,
+    checkCanGenerate,
+    recordSuccessfulGeneration,
+  } = useAuth();
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
   // --- Form & Logo State ---
@@ -213,6 +223,72 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
+  // --- Profile Auto-sync & Apply Listeners ---
+  const hasAutoAppliedProfile = useRef<boolean>(false);
+  useEffect(() => {
+    if (
+      userProfile &&
+      (userProfile.studentName || userProfile.rollNumber) &&
+      !hasAutoAppliedProfile.current
+    ) {
+      hasAutoAppliedProfile.current = true;
+      setFormData((prev) => ({
+        ...prev,
+        studentName: userProfile.studentName || prev.studentName,
+        collegeName: userProfile.collegeName || prev.collegeName,
+        collegeLocation: userProfile.collegeLocation || prev.collegeLocation,
+        facultyOrInstitute:
+          userProfile.facultyOrInstitute || prev.facultyOrInstitute,
+        program: userProfile.program || prev.program,
+        semester: userProfile.semester || prev.semester,
+        rollNumber: userProfile.rollNumber || prev.rollNumber,
+        regdNumber: userProfile.regdNumber || prev.regdNumber,
+        examRollNumber: userProfile.examRollNumber || prev.examRollNumber,
+        batch: userProfile.batch || prev.batch,
+        teacherName: userProfile.teacherName || prev.teacherName,
+        teacherDepartment:
+          userProfile.teacherDepartment || prev.teacherDepartment,
+      }));
+    }
+  }, [userProfile]);
+
+  useEffect(() => {
+    function handleApplyProfile(e: Event) {
+      const customEvent = e as CustomEvent<StudentAcademicDetails>;
+      if (customEvent.detail) {
+        const d = customEvent.detail;
+        setFormData((prev) => ({
+          ...prev,
+          studentName: d.studentName || prev.studentName,
+          collegeName: d.collegeName || prev.collegeName,
+          collegeLocation: d.collegeLocation || prev.collegeLocation,
+          facultyOrInstitute: d.facultyOrInstitute || prev.facultyOrInstitute,
+          program: d.program || prev.program,
+          semester: d.semester || prev.semester,
+          rollNumber: d.rollNumber || prev.rollNumber,
+          regdNumber: d.regdNumber || prev.regdNumber,
+          examRollNumber: d.examRollNumber || prev.examRollNumber,
+          batch: d.batch || prev.batch,
+          teacherName: d.teacherName || prev.teacherName,
+          teacherDepartment: d.teacherDepartment || prev.teacherDepartment,
+        }));
+      }
+    }
+
+    window.addEventListener("tu_apply_profile_to_form", handleApplyProfile);
+    window.addEventListener("tu_academic_profile_updated", handleApplyProfile);
+    return () => {
+      window.removeEventListener(
+        "tu_apply_profile_to_form",
+        handleApplyProfile
+      );
+      window.removeEventListener(
+        "tu_academic_profile_updated",
+        handleApplyProfile
+      );
+    };
+  }, []);
+
   // --- Logo session-only management (not saved to localStorage per user request) ---
   useEffect(() => {
     // Logo is intentionally kept in memory-only and discarded on refresh/clear.
@@ -244,13 +320,8 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        let errData: any = {};
-        try {
-          errData = await response.json();
-        } catch (e) {
-          errData = { details: `Server error: ${response.statusText || response.status}` };
-        }
-        throw new Error(errData.details || errData.error || "Failed to render preview");
+        const errData = await response.json();
+        throw new Error(errData.details || "Failed to render preview");
       }
 
       const blob = await response.blob();
@@ -420,6 +491,10 @@ export default function Home() {
 
   // --- Download Handler ---
   const downloadDocument = async (format: string) => {
+    if (!checkCanGenerate()) {
+      return;
+    }
+
     setIsDownloading(format);
     try {
       const body = documentType === "index"
@@ -458,6 +533,8 @@ export default function Home() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      await recordSuccessfulGeneration(documentType === "index" ? "index" : "cover", format as any);
     } catch (err) {
       console.error("Download failed:", err);
       alert("Failed to export. Please try again.");
@@ -468,6 +545,10 @@ export default function Home() {
 
   // --- Hidden iframe print engine (Gold Standard for web printing) ---
   const handlePrint = async () => {
+    if (!checkCanGenerate()) {
+      return;
+    }
+
     setIsPrinting(true);
     try {
       const body = documentType === "index"
@@ -511,6 +592,8 @@ export default function Home() {
           URL.revokeObjectURL(url);
         }, 1500);
       };
+
+      await recordSuccessfulGeneration(documentType === "index" ? "index" : "cover", "pdf");
     } catch (err) {
       console.error("Printing failed:", err);
       alert("Failed to print page.");
@@ -623,6 +706,9 @@ export default function Home() {
                 {compiling ? 'Compiling…' : 'Typst Active'}
               </span>
             </div>
+
+            {/* Auth & Daily Quota Widget */}
+            <AuthHeaderWidget />
 
             {/* Theme Toggle */}
             <button
@@ -882,9 +968,86 @@ export default function Home() {
 
                     {/* Group C: Student Specific Info */}
                     <div className="border-t border-gray-100 pt-5 dark:border-zinc-800">
-                      <div className="flex items-center space-x-2 border-b border-gray-100 pb-2.5 dark:border-zinc-800/80">
-                        <div className="h-4 w-1 rounded-full bg-black dark:bg-white" />
-                        <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">3. Your Details</h4>
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-2.5 dark:border-zinc-800/80">
+                        <div className="flex items-center space-x-2">
+                          <div className="h-4 w-1 rounded-full bg-black dark:bg-white" />
+                          <h4 className="text-[11px] uppercase tracking-wider font-bold text-gray-500 dark:text-neutral-400">3. Your Details</h4>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          {user ? (
+                            <>
+                              <button
+                                id="btn-sync-profile-data"
+                                type="button"
+                                onClick={() => {
+                                  if (userProfile) {
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      studentName:
+                                        userProfile.studentName ||
+                                        userProfile.displayName ||
+                                        prev.studentName,
+                                      collegeName:
+                                        userProfile.collegeName ||
+                                        prev.collegeName,
+                                      collegeLocation:
+                                        userProfile.collegeLocation ||
+                                        prev.collegeLocation,
+                                      facultyOrInstitute:
+                                        userProfile.facultyOrInstitute ||
+                                        prev.facultyOrInstitute,
+                                      program:
+                                        userProfile.program || prev.program,
+                                      semester:
+                                        userProfile.semester || prev.semester,
+                                      rollNumber:
+                                        userProfile.rollNumber || prev.rollNumber,
+                                      regdNumber:
+                                        userProfile.regdNumber || prev.regdNumber,
+                                      examRollNumber:
+                                        userProfile.examRollNumber ||
+                                        prev.examRollNumber,
+                                      batch: userProfile.batch || prev.batch,
+                                      teacherName:
+                                        userProfile.teacherName || prev.teacherName,
+                                      teacherDepartment:
+                                        userProfile.teacherDepartment ||
+                                        prev.teacherDepartment,
+                                    }));
+                                  } else {
+                                    setShowProfileModal(true);
+                                  }
+                                }}
+                                className="inline-flex items-center gap-1 rounded-md bg-neutral-100 dark:bg-zinc-800 hover:bg-neutral-200 dark:hover:bg-zinc-700 px-2 py-1 text-[11px] font-medium text-neutral-800 dark:text-zinc-200 transition-colors cursor-pointer"
+                                title="Fill fields with your saved profile details"
+                              >
+                                <UserCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                                <span>Load Profile</span>
+                              </button>
+
+                              <button
+                                id="btn-open-edit-profile-form"
+                                type="button"
+                                onClick={() => setShowProfileModal(true)}
+                                className="inline-flex items-center gap-1 rounded-md border border-neutral-300 dark:border-zinc-700 hover:border-black dark:hover:border-white bg-white dark:bg-zinc-900 px-2 py-1 text-[11px] font-semibold text-neutral-900 dark:text-white transition-colors cursor-pointer"
+                                title="Open full Student Academic Profile form to record Name, College, Roll No, Regd No"
+                              >
+                                <GraduationCap className="h-3 w-3" />
+                                <span>Edit Profile Form</span>
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              id="btn-signin-to-save-profile"
+                              type="button"
+                              onClick={() => setShowProfileModal(true)}
+                              className="inline-flex items-center gap-1 rounded-md text-[11px] font-medium text-neutral-500 hover:text-neutral-900 dark:text-zinc-400 dark:hover:text-white cursor-pointer"
+                            >
+                              <span>Sign in to save profile</span>
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>

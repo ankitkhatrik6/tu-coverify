@@ -32,6 +32,7 @@ import TUCollegeAutocomplete from "@/components/TUCollegeAutocomplete";
 import TUCourseAutocomplete from "@/components/TUCourseAutocomplete";
 import { TUCollege } from "@/lib/tu-colleges";
 import { TUCourse } from "@/lib/tu-courses";
+import { useAuth } from "@/context/AuthContext";
 
 export interface BatchStudent {
   id: string;
@@ -73,7 +74,22 @@ const DEFAULT_CLASS_INFO: ClassInfo = {
   teacherDepartment: "Department of CSIT",
 };
 
+const DEMO_STUDENTS: BatchStudent[] = [
+  { id: "1", name: "Aarav Shrestha", rollNumber: "01/82", regdNumber: "5-2-0033-0101-2022", examRollNumber: "820001" },
+  { id: "2", name: "Ankit Khatri KC", rollNumber: "09/82", regdNumber: "5-2-1234-0567-2022", examRollNumber: "820015" },
+  { id: "3", name: "Bibek Sharma", rollNumber: "12/82", regdNumber: "5-2-0033-0112-2022", examRollNumber: "820018" },
+  { id: "4", name: "Diya Adhikari", rollNumber: "15/82", regdNumber: "5-2-0033-0115-2022", examRollNumber: "820021" },
+  { id: "5", name: "Kiran Thapa", rollNumber: "20/82", regdNumber: "5-2-0033-0120-2022", examRollNumber: "820026" },
+  { id: "6", name: "Manish Pokharel", rollNumber: "25/82", regdNumber: "5-2-0033-0125-2022", examRollNumber: "820031" },
+  { id: "7", name: "Nisha Maharjan", rollNumber: "30/82", regdNumber: "5-2-0033-0130-2022", examRollNumber: "820036" },
+  { id: "8", name: "Prashant Basnet", rollNumber: "35/82", regdNumber: "5-2-0033-0135-2022", examRollNumber: "820041" },
+  { id: "9", name: "Rohan Chaudhary", rollNumber: "40/82", regdNumber: "5-2-0033-0140-2022", examRollNumber: "820046" },
+  { id: "10", name: "Smarika Poudel", rollNumber: "45/82", regdNumber: "5-2-0033-0145-2022", examRollNumber: "820051" },
+];
+
 export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingle }: CRBulkCoverGeneratorProps) {
+  const { checkCanGenerate, recordSuccessfulGeneration } = useAuth();
+
   // Class configuration state
   const [classInfo, setClassInfo] = useState<ClassInfo>({
     ...DEFAULT_CLASS_INFO,
@@ -81,7 +97,7 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
   });
 
   // Students roster state
-  const [students, setStudents] = useState<BatchStudent[]>([]);
+  const [students, setStudents] = useState<BatchStudent[]>(DEMO_STUDENTS);
 
   // Tab & Input modes
   const [inputTab, setInputTab] = useState<"upload" | "manual">("upload");
@@ -300,9 +316,8 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
       });
 
       if (!res.ok) {
-        let err: any = {};
-        try { err = await res.json(); } catch(e) { err = { details: `Server error: ${res.statusText || res.status}` }; }
-        throw new Error(err.details || err.error || "Failed to render sample preview");
+        const err = await res.json();
+        throw new Error(err.details || "Failed to render sample preview");
       }
 
       let svgText = await res.text();
@@ -319,6 +334,10 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
 
   // --- Batch Download: Combined PDF ---
   const handleDownloadCombinedPDF = async () => {
+    if (!checkCanGenerate()) {
+      return;
+    }
+
     if (students.length === 0) {
       setErrorMessage("Cannot generate PDF: Roster is empty. Please add or upload students.");
       return;
@@ -343,9 +362,8 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
       });
 
       if (!res.ok) {
-        let err: any = {};
-        try { err = await res.json(); } catch(e) { err = { details: `Server error: ${res.statusText || res.status}` }; }
-        throw new Error(err.details || err.error || "Failed to generate combined PDF");
+        const err = await res.json();
+        throw new Error(err.details || "Failed to generate combined PDF");
       }
 
       const blob = await res.blob();
@@ -362,6 +380,7 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
+      await recordSuccessfulGeneration("batch", "pdf");
       setStatusMessage(`Successfully generated and downloaded combined PDF (${students.length} pages).`);
     } catch (err: any) {
       setErrorMessage(err.message || "Error generating combined PDF");
@@ -372,6 +391,10 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
 
   // --- Batch Download: ZIP Archive ---
   const handleDownloadZip = async () => {
+    if (!checkCanGenerate()) {
+      return;
+    }
+
     if (students.length === 0) {
       setErrorMessage("Cannot generate ZIP: Roster is empty. Please add or upload students.");
       return;
@@ -396,9 +419,8 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
       });
 
       if (!res.ok) {
-        let err: any = {};
-        try { err = await res.json(); } catch(e) { err = { details: `Server error: ${res.statusText || res.status}` }; }
-        throw new Error(err.details || err.error || "Failed to package ZIP");
+        const err = await res.json();
+        throw new Error(err.details || "Failed to package ZIP");
       }
 
       const blob = await res.blob();
@@ -415,6 +437,7 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
+      await recordSuccessfulGeneration("batch", "zip");
       setStatusMessage(`Successfully generated and downloaded ZIP archive with ${students.length} student PDFs.`);
     } catch (err: any) {
       setErrorMessage(err.message || "Error generating ZIP archive");
@@ -785,7 +808,7 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
                   type="text"
                   value={manualName}
                   onChange={(e) => setManualName(e.target.value)}
-                  placeholder="e.g. Student Name"
+                  placeholder="e.g. Aarav Shrestha"
                   className="w-full rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs text-gray-900 focus:border-black focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                 />
               </div>
