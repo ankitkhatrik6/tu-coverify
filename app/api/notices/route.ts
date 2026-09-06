@@ -11,6 +11,19 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const MAX_QUERY_LENGTH = 200;
+const MAX_DETAIL_URL_LENGTH = 2048;
+
+function isAllowedNoticeUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" &&
+      (url.hostname === "tu.edu.np" || url.hostname.endsWith(".tu.edu.np"));
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -19,8 +32,21 @@ export async function GET(req: NextRequest) {
     const detailUrl = searchParams.get("url") || "";
     const detailSource = searchParams.get("detailSource") || undefined;
 
+    if (query.length > MAX_QUERY_LENGTH || detailUrl.length > MAX_DETAIL_URL_LENGTH) {
+      return NextResponse.json(
+        { success: false, error: "Request parameters are too long." },
+        { status: 400 }
+      );
+    }
+
     // If detail is requested
     if (detailUrl) {
+      if (!isAllowedNoticeUrl(detailUrl)) {
+        return NextResponse.json(
+          { success: false, error: "The notice URL is not an allowed TU source." },
+          { status: 400 }
+        );
+      }
       const detail = await getNoticeDetail(detailUrl, detailSource, {
         timeout: 12000,
       });
