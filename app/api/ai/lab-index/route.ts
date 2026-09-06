@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
-import { GoogleGenAI } from "@google/genai";
 
 interface RequestBody {
   prompt: string;
@@ -275,39 +274,12 @@ ${combinedPrompt}
 
 CRITICAL: Strictly execute the instructions given above (e.g. make titles long/detailed, make short, add dates, format objectives, etc.). Return only the final JSON object.`;
 
-    const geminiKey = process.env.GEMINI_API_KEY;
     const groqKey = process.env.GROQ_API_KEY;
 
     let rawJsonResult: string | null = null;
     let modelUsed = "";
     let lastError: string = "";
 
-    // 1. Try Gemini first if GEMINI_API_KEY is available
-    if (geminiKey) {
-      try {
-        const ai = new GoogleGenAI({ apiKey: geminiKey.trim() });
-        const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: userPrompt,
-          config: {
-            systemInstruction: systemPrompt,
-            responseMimeType: "application/json",
-            temperature: 0.2,
-          },
-        });
-        const content = response.text;
-        if (content && content.trim()) {
-          rawJsonResult = content;
-          modelUsed = "Gemini (gemini-2.5-flash)";
-        }
-      } catch (geminiErr: unknown) {
-        const errMsg = geminiErr instanceof Error ? geminiErr.message : String(geminiErr);
-        console.warn("Gemini generation failed, trying fallback:", errMsg);
-        lastError = errMsg;
-      }
-    }
-
-    // 2. Try Groq AI if rawJsonResult is still null and GROQ_API_KEY is available
     if (!rawJsonResult && groqKey) {
       const groq = new Groq({ apiKey: groqKey.trim() });
       
@@ -370,10 +342,10 @@ CRITICAL: Strictly execute the instructions given above (e.g. make titles long/d
     }
 
     if (!rawJsonResult) {
-      if (!geminiKey && !groqKey) {
+      if (!groqKey) {
         return NextResponse.json(
           {
-            error: "No AI API key is configured. Please configure GEMINI_API_KEY or GROQ_API_KEY in the environment.",
+            error: "GROQ_API_KEY is not configured in the server environment.",
           },
           { status: 500 }
         );
