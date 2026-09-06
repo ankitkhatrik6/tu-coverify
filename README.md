@@ -79,6 +79,16 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Configure Firebase Authentication
+
+1. Create a Firebase project and add a Web app in **Project settings**.
+2. Enable **Email/Password** and **Google** under **Authentication > Sign-in method**.
+3. Create a Firestore database, then deploy the rules from `firestore.rules`.
+4. Copy `.env.example` to `.env.local` and fill in the new Web app configuration values.
+5. Add your local and production domains under **Authentication > Settings > Authorized domains**.
+
+The Firebase client reads `NEXT_PUBLIC_FIREBASE_*` variables, so switching projects does not require a code change. `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, and the AI key remain server-side environment variables.
+
 ### Run in Production (Host on Network)
 
 ```bash
