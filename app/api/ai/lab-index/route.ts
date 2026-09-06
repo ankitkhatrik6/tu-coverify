@@ -1,17 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import { GoogleGenAI } from "@google/genai";
 
 interface RequestBody {
   prompt: string;
   rawText?: string;
   indexTitle?: string;
   deviceId?: string;
+  userId?: string;
+  userEmail?: string;
 }
 
 // In-memory rate limiting store: identifier -> timestamp array
 const rateLimitMap = new Map<string, number[]>();
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+const MAX_PROMPT_LENGTH = 12000;
+const MAX_INDEX_TITLE_LENGTH = 200;
+const MAX_IDENTIFIER_LENGTH = 200;
 
 function checkAndRecordRateLimit(identifiers: string[]): { allowed: boolean; remaining: number; resetHours: number } {
   const now = Date.now();
@@ -209,8 +215,16 @@ export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as RequestBody;
     const combinedPrompt = (body.prompt || body.rawText || "").trim();
-    const indexTitle = body.indexTitle || "Lab Index";
-    const clientDeviceId = (body.deviceId || "").trim();
+    const indexTitle = (body.indexTitle || "Lab Index").trim().slice(0, MAX_INDEX_TITLE_LENGTH);
+    const clientDeviceId = (body.deviceId || "").trim().slice(0, MAX_IDENTIFIER_LENGTH);
+    const userId = (body.userId || "").trim().slice(0, MAX_IDENTIFIER_LENGTH);
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "AI Lab Index Assistant is only available for logged-in students. Please sign in to your account." },
+        { status: 401 }
+      );
+    }
 
     if (!combinedPrompt) {
       return NextResponse.json(
@@ -219,7 +233,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Identify client by IP headers and device ID
+    if (combinedPrompt.length > MAX_PROMPT_LENGTH) {
+      return NextResponse.json(
+        { error: "Please keep the lab prompt under 12,000 characters." },
+        { status: 413 }
+      );
+    }
+
+    // Identify client by IP headers, user ID, and device ID
     const forwardedFor = req.headers.get("x-forwarded-for");
     const realIp = req.headers.get("x-real-ip");
     const cfConnectingIp = req.headers.get("cf-connecting-ip");
@@ -228,6 +249,7 @@ export async function POST(req: NextRequest) {
       : realIp || cfConnectingIp || "unknown-ip";
 
     const identifiers = [
+      `user:${userId}`,
       clientIp !== "unknown-ip" ? `ip:${clientIp}` : "",
       clientDeviceId ? `device:${clientDeviceId}` : "",
     ].filter(Boolean);
@@ -253,14 +275,40 @@ ${combinedPrompt}
 
 CRITICAL: Strictly execute the instructions given above (e.g. make titles long/detailed, make short, add dates, format objectives, etc.). Return only the final JSON object.`;
 
+    const geminiKey = process.env.GEMINI_API_KEY;
     const groqKey = process.env.GROQ_API_KEY;
 
     let rawJsonResult: string | null = null;
     let modelUsed = "";
     let lastError: string = "";
 
-    // Try Groq AI
-    if (groqKey) {
+    // 1. Try Gemini first if GEMINI_API_KEY is available
+    if (geminiKey) {
+      try {
+        const ai = new GoogleGenAI({ apiKey: geminiKey.trim() });
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: userPrompt,
+          config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: "application/json",
+            temperature: 0.2,
+          },
+        });
+        const content = response.text;
+        if (content && content.trim()) {
+          rawJsonResult = content;
+          modelUsed = "Gemini (gemini-2.5-flash)";
+        }
+      } catch (geminiErr: unknown) {
+        const errMsg = geminiErr instanceof Error ? geminiErr.message : String(geminiErr);
+        console.warn("Gemini generation failed, trying fallback:", errMsg);
+        lastError = errMsg;
+      }
+    }
+
+    // 2. Try Groq AI if rawJsonResult is still null and GROQ_API_KEY is available
+    if (!rawJsonResult && groqKey) {
       const groq = new Groq({ apiKey: groqKey.trim() });
       
       // Verified stable Groq models in priority order
@@ -322,10 +370,10 @@ CRITICAL: Strictly execute the instructions given above (e.g. make titles long/d
     }
 
     if (!rawJsonResult) {
-      if (!groqKey) {
+      if (!geminiKey && !groqKey) {
         return NextResponse.json(
           {
-            error: "GROQ_API_KEY is not configured in the server environment.",
+            error: "No AI API key is configured. Please configure GEMINI_API_KEY or GROQ_API_KEY in the environment.",
           },
           { status: 500 }
         );

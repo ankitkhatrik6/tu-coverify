@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { 
   Bot,
   BrainCircuit, 
-  Zap, 
   Check, 
   AlertCircle, 
   Loader2, 
@@ -12,7 +12,10 @@ import {
   ArrowRight,
   PlusCircle,
   Copy,
-  Send
+  Send,
+  Lock,
+  LogIn,
+  UserCheck
 } from "lucide-react";
 
 export interface IndexRow {
@@ -71,6 +74,7 @@ export default function LabIndexAIAssistant({
   currentIndexTitle,
   onApplyRows,
 }: LabIndexAIAssistantProps) {
+  const { user, setShowAuthModal, setAuthModalView, setAuthModalMessage } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -92,7 +96,26 @@ export default function LabIndexAIAssistant({
     return storedId;
   };
 
+  const handleOpenAuthModal = () => {
+    setAuthModalView("signin");
+    setAuthModalMessage("Please sign in with your student account to use the AI Lab Index Assistant.");
+    setShowAuthModal(true);
+  };
+
+  const handleToggle = () => {
+    if (!user) {
+      handleOpenAuthModal();
+      return;
+    }
+    setIsOpen(!isOpen);
+  };
+
   const handleGenerate = async () => {
+    if (!user) {
+      handleOpenAuthModal();
+      return;
+    }
+
     if (!prompt.trim()) {
       setError("Please enter your prompt or paste your lab questions.");
       return;
@@ -111,6 +134,8 @@ export default function LabIndexAIAssistant({
           prompt: prompt.trim(),
           indexTitle: currentIndexTitle,
           deviceId: devId || undefined,
+          userId: user.uid,
+          userEmail: user.email,
         }),
       });
 
@@ -151,42 +176,93 @@ export default function LabIndexAIAssistant({
   };
 
   return (
-    <div className="rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/70 via-purple-50/30 to-blue-50/50 p-4 dark:border-indigo-950/80 dark:from-indigo-950/20 dark:via-purple-950/10 dark:to-zinc-950/50 shadow-sm">
+    <div className="rounded-xl border border-neutral-200 bg-neutral-50/70 p-4 dark:border-zinc-800 dark:bg-zinc-900/50 shadow-xs">
       
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black text-white dark:bg-white dark:text-black shadow-sm">
-            <Bot className="h-4 w-4 sm:h-5 sm:w-5 text-white dark:text-black" />
+          <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-black text-white dark:bg-white dark:text-black shadow-xs">
+            <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
           <div className="flex flex-col">
-            <h4 className="text-sm font-bold tracking-wide text-gray-900 dark:text-white">
-              AI Lab Index Assistant
-            </h4>
-            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-neutral-400 leading-tight">
-              Type or paste your lab questions and describe how to format your table.
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-bold tracking-tight text-neutral-900 dark:text-white">
+                AI Lab Index Assistant
+              </h4>
+              {user ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/50">
+                  <UserCheck className="h-2.5 w-2.5" />
+                  Logged In
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/50">
+                  <Lock className="h-2.5 w-2.5" />
+                  Login Required
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] sm:text-xs text-neutral-500 dark:text-zinc-400 leading-tight">
+              {user
+                ? "Type or paste your lab questions and describe how to format your index table."
+                : "Exclusively for logged-in students to automatically format experiments."}
             </p>
           </div>
         </div>
 
-        <button
-          id="toggle-ai-assistant-btn"
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex w-full sm:w-auto justify-center items-center gap-1.5 rounded-lg bg-black px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all cursor-pointer shadow-sm shrink-0"
-        >
-          <BrainCircuit className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 dark:text-emerald-600" />
-          {isOpen ? "Close Assistant" : "Auto-Fill with AI"}
-        </button>
+        {user ? (
+          <button
+            id="toggle-ai-assistant-btn"
+            type="button"
+            onClick={handleToggle}
+            className="flex w-full sm:w-auto justify-center items-center gap-1.5 rounded-lg bg-black px-4 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all cursor-pointer shadow-xs shrink-0"
+          >
+            <BrainCircuit className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 dark:text-emerald-600" />
+            {isOpen ? "Close Assistant" : "Auto-Fill with AI"}
+          </button>
+        ) : (
+          <button
+            id="btn-login-for-ai-assistant"
+            type="button"
+            onClick={handleOpenAuthModal}
+            className="flex w-full sm:w-auto justify-center items-center gap-1.5 rounded-lg bg-neutral-900 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all cursor-pointer shadow-xs shrink-0"
+          >
+            <LogIn className="h-3.5 w-3.5" />
+            Sign in to Use AI
+          </button>
+        )}
       </div>
 
-      {/* Expandable Assistant Panel */}
-      {isOpen && (
-        <div className="mt-4 space-y-4 border-t border-indigo-100 pt-4 dark:border-zinc-800">
+      {/* When user is NOT logged in and tries to view or open */}
+      {!user && isOpen && (
+        <div className="mt-4 rounded-xl border border-amber-200/80 bg-amber-50/70 p-4 dark:border-amber-900/50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-2.5">
+            <Lock className="h-4 w-4 mt-0.5 text-amber-600 dark:text-amber-400 shrink-0" />
+            <div className="text-xs">
+              <p className="font-bold">Student Account Required</p>
+              <p className="text-amber-800/80 dark:text-amber-300/80 mt-0.5">
+                Please sign in with your student account to automatically generate, format, and apply lab index tables with AI.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleOpenAuthModal}
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-1.5 bg-black text-white dark:bg-white dark:text-black rounded-lg text-xs font-semibold hover:opacity-90 transition-all cursor-pointer shrink-0"
+          >
+            <LogIn className="h-3 w-3" />
+            Sign In Now
+          </button>
+        </div>
+      )}
+
+      {/* Expandable Assistant Panel (Available for Logged-In Users) */}
+      {user && isOpen && (
+        <div className="mt-4 space-y-4 border-t border-neutral-200 pt-4 dark:border-zinc-800">
           
           {/* Single Unified Prompt Field */}
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
-              <label className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-neutral-300">
+              <label className="text-xs sm:text-sm font-semibold text-neutral-700 dark:text-zinc-300">
                 Prompt & Lab Questions
               </label>
               <div className="flex flex-wrap items-center gap-1.5">
@@ -198,7 +274,7 @@ export default function LabIndexAIAssistant({
                       setPrompt(sample.prompt);
                       setError("");
                     }}
-                    className="text-[10px] sm:text-xs text-gray-600 hover:text-black dark:text-neutral-400 dark:hover:text-white underline decoration-dotted px-1.5 py-1 rounded hover:bg-white/60 dark:hover:bg-zinc-800 transition-all cursor-pointer"
+                    className="text-[10px] sm:text-xs text-neutral-600 hover:text-black dark:text-zinc-400 dark:hover:text-white underline decoration-dotted px-1.5 py-1 rounded hover:bg-white/60 dark:hover:bg-zinc-800 transition-all cursor-pointer"
                     title={`Load ${sample.name} prompt`}
                   >
                     Sample: {sample.name.split(" ")[0]}
@@ -208,7 +284,7 @@ export default function LabIndexAIAssistant({
                   <button
                     type="button"
                     onClick={() => setPrompt("")}
-                    className="text-[10px] sm:text-xs text-gray-400 hover:text-gray-600 dark:hover:text-neutral-200 flex items-center gap-0.5 cursor-pointer ml-1 py-1"
+                    className="text-[10px] sm:text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-zinc-200 flex items-center gap-0.5 cursor-pointer ml-1 py-1"
                   >
                     <RotateCcw className="h-2.5 w-2.5 sm:h-3 sm:w-3" /> Clear
                   </button>
@@ -220,13 +296,13 @@ export default function LabIndexAIAssistant({
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Type your instructions and paste your lab questions here..."
-              className="w-full rounded-lg border border-gray-200 bg-white p-3 text-xs text-gray-900 placeholder:text-gray-400 focus:border-black focus:ring-1 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-neutral-100 font-mono resize-none"
+              className="w-full rounded-xl border border-neutral-300 bg-white p-3 text-xs text-neutral-900 placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 font-mono resize-none"
             />
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300 border border-red-200 dark:border-red-900">
+            <div className="flex items-start gap-2 rounded-xl bg-red-50 p-3 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300 border border-red-200 dark:border-red-900">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-red-500" />
               <div>
                 <p className="font-semibold">{error}</p>
@@ -241,7 +317,7 @@ export default function LabIndexAIAssistant({
               type="button"
               onClick={handleGenerate}
               disabled={loading || !prompt.trim()}
-              className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-xs font-bold text-white hover:bg-gray-800 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all cursor-pointer shadow-sm"
+              className="flex items-center gap-2 rounded-xl bg-black px-4 py-2 text-xs font-bold text-white hover:bg-neutral-800 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all cursor-pointer shadow-xs"
             >
               {loading ? (
                 <>
@@ -250,7 +326,7 @@ export default function LabIndexAIAssistant({
                 </>
               ) : (
                 <>
-                  <Send className="h-3.5 w-3.5 text-white dark:text-black" />
+                  <Send className="h-3.5 w-3.5" />
                   Generate
                 </>
               )}
@@ -288,14 +364,14 @@ export default function LabIndexAIAssistant({
               <div className="max-h-48 overflow-y-auto rounded-lg border border-emerald-100 bg-white p-2.5 dark:border-zinc-800 dark:bg-zinc-950 space-y-2 text-xs divide-y divide-gray-100 dark:divide-zinc-800">
                 {parsedResult.rows.map((row, idx) => (
                   <div key={idx} className="pt-2 first:pt-0 flex items-start gap-2.5">
-                    <span className="font-mono font-bold text-gray-400 dark:text-neutral-500 text-[11px] shrink-0 w-6">
+                    <span className="font-mono font-bold text-neutral-400 dark:text-zinc-500 text-[11px] shrink-0 w-6">
                       #{row.sn}
                     </span>
-                    <div className="flex-1 text-gray-800 dark:text-neutral-200 text-xs">
+                    <div className="flex-1 text-neutral-800 dark:text-zinc-200 text-xs">
                       {row.title}
                     </div>
                     {row.date && (
-                      <span className="font-mono text-[10px] text-gray-500 dark:text-neutral-400 bg-gray-100 dark:bg-zinc-900 px-1.5 py-0.5 rounded shrink-0">
+                      <span className="font-mono text-[10px] text-neutral-500 dark:text-zinc-400 bg-neutral-100 dark:bg-zinc-900 px-1.5 py-0.5 rounded shrink-0">
                         {row.date}
                       </span>
                     )}
@@ -316,7 +392,7 @@ export default function LabIndexAIAssistant({
                 <button
                   type="button"
                   onClick={() => handleApply("replace")}
-                  className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition-all cursor-pointer shadow-sm"
+                  className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 transition-all cursor-pointer shadow-xs"
                 >
                   <ArrowRight className="h-3.5 w-3.5" />
                   Replace All Rows & Apply
