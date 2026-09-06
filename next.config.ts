@@ -3,6 +3,7 @@ import path from 'path';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  outputFileTracingRoot: path.join(__dirname, './'),
   reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
@@ -21,10 +22,6 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: ["sharp"],
-  outputFileTracingRoot: path.join(__dirname, './'),
-  outputFileTracingIncludes: {
-    '/api/compile': ['./bin/typst', './public/**/*'],
-  },
 };
 
 export default nextConfig;

@@ -15,7 +15,6 @@ import {
   GraduationCap, 
   Clock, 
   Award,
-  Sparkles,
   Layers
 } from "lucide-react";
 

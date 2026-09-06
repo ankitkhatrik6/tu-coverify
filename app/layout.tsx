@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import { HeartHandshake, ExternalLink } from 'lucide-react';
 import './globals.css'; // Global styles
+import Providers from '@/components/Providers';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -20,7 +21,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'TU Coverify - Make TU Lab Report Cover Pages Online',
-  description: 'Tribhuvan University (TU) lab report cover pages, index tables, notices, and official B.Sc. CSIT SGPA & CGPA calculator with IoST grading formulas.',
+  description: 'Tribhuvan University (TU) lab report cover pages, CR bulk batch generator, lab index tables, notices, and official B.Sc. CSIT SGPA & CGPA calculator.',
   keywords: [
     'TU Cover Page', 
     'Tribhuvan University', 
@@ -34,20 +35,6 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Ankit Khatri KC', url: 'https://github.com/ankitkhatrik6' }],
   creator: 'Ankit Khatri KC',
-  alternates: {
-    canonical: '/',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -78,7 +65,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body suppressHydrationWarning className="antialiased font-sans transition-colors duration-200">
         {/* Subtle Top Disaster Relief Donation Banner */}
         <div className="bg-red-50/90 text-neutral-800 border-b border-red-100 dark:bg-zinc-950/90 dark:text-neutral-200 dark:border-zinc-800/80 text-[11px] sm:text-xs py-1.5 sm:py-2 px-3 flex justify-center transition-colors">
@@ -97,7 +84,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
             </span>
           </a>
         </div>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
