@@ -178,6 +178,7 @@ export default function Home() {
     setShowProfileModal,
     checkCanGenerate,
     recordSuccessfulGeneration,
+    recordRateLimitReached,
   } = useAuth();
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
@@ -516,7 +517,13 @@ export default function Home() {
         body: JSON.stringify(body),
       });
 
-      if (!response.ok) throw new Error("Compilation failed");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        if (response.status === 429 && errData?.rateLimited) {
+          recordRateLimitReached();
+        }
+        throw new Error(errData?.details || "Compilation failed");
+      }
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
@@ -570,7 +577,13 @@ export default function Home() {
         body: JSON.stringify(body),
       });
 
-      if (!response.ok) throw new Error("Failed to compile PDF for printing");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => null);
+        if (response.status === 429 && errData?.rateLimited) {
+          recordRateLimitReached();
+        }
+        throw new Error(errData?.details || "Failed to compile PDF for printing");
+      }
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
 
