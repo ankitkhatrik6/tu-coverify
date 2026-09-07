@@ -9,6 +9,7 @@ import os from "os";
 import { generateDocx } from "@/lib/docx-generator";
 import { generateIndexDocx } from "@/lib/docx-index-generator";
 import { getTypstBinary } from "@/lib/typst";
+import { checkAndRecordIpLimit } from "@/lib/ip-rate-limit";
 import JSZip from "jszip";
 
 // Disable HMR/Watch options for API-based temporary files
@@ -17,6 +18,25 @@ export const dynamic = "force-dynamic";
 const execAsync = promisify(exec);
 
 export async function POST(req: NextRequest) {
+  const requestBody = await req.clone().json().catch(() => null);
+  const requestedFormat = requestBody?.format;
+  const isPreview = requestedFormat === "svg" || requestedFormat === "png";
+
+  if (!isPreview) {
+    const rateStatus = await checkAndRecordIpLimit(req);
+    if (!rateStatus.allowed) {
+      return NextResponse.json(
+        {
+          error: "Daily free limit reached",
+          details: `This IP address has reached the 3 free generations limit. Please try again in ~${rateStatus.resetHours} hours.`,
+          rateLimited: true,
+          resetHours: rateStatus.resetHours,
+        },
+        { status: 429 }
+      );
+    }
+  }
+
   const tmpDir = os.tmpdir();
   const uploadDir = path.join(tmpDir, "uploads");
 
