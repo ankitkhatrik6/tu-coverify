@@ -22,6 +22,20 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'TU Coverify - Make TU Lab Report Cover Pages Online',
   description: 'Tribhuvan University (TU) lab report cover pages, CR bulk batch generator, lab index tables, notices, and official B.Sc. CSIT SGPA & CGPA calculator.',
+  alternates: {
+    canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
   keywords: [
     'TU Cover Page', 
     'Tribhuvan University', 
@@ -67,6 +81,21 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body suppressHydrationWarning className="antialiased font-sans transition-colors duration-200">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'TU Coverify',
+              url: 'https://tucoverify.ankitak.com.np/',
+              description: 'Free online tools for Tribhuvan University lab report cover pages, lab indexes, bulk covers, notices, and B.Sc. CSIT SGPA and CGPA calculations.',
+              applicationCategory: 'EducationApplication',
+              operatingSystem: 'Web',
+              offers: { '@type': 'Offer', price: '0', priceCurrency: 'NPR' },
+            }),
+          }}
+        />
         {/* Subtle Top Disaster Relief Donation Banner */}
         <div className="bg-red-50/90 text-neutral-800 border-b border-red-100 dark:bg-zinc-950/90 dark:text-neutral-200 dark:border-zinc-800/80 text-[11px] sm:text-xs py-1.5 sm:py-2 px-3 flex justify-center transition-colors">
           <a

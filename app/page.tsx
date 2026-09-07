@@ -728,6 +728,14 @@ export default function Home() {
 
       {/* 2. Main Content Grid */}
       <main className="mx-auto mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className="mb-6 max-w-3xl">
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            Tribhuvan University lab report tools
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-neutral-400 sm:text-base">
+            Create TU lab report cover pages, bulk covers, lab index tables, and B.Sc. CSIT SGPA and CGPA calculations online. Download clean, printable documents in the format used by Tribhuvan University students.
+          </p>
+        </section>
         
         {/* Document Type Selector (Desktop/Tablet) */}
         <div className="mb-6 hidden sm:flex rounded-xl bg-gray-200/70 p-1 dark:bg-zinc-900 shadow-inner overflow-x-auto custom-scrollbar">
