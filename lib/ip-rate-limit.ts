@@ -8,19 +8,6 @@ const hasRedisConfig = Boolean(
   process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
 );
 
-type RateLimitEntry = {
-  timestamps: number[];
-};
-
-const entries = new Map<string, RateLimitEntry>();
-const redis =
-  hasRedisConfig
-    ? new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      })
-    : null;
-
 function getClientIp(request: Request): string {
   const realIp = request.headers.get("x-real-ip");
   if (realIp) return realIp.trim();
@@ -36,41 +23,25 @@ function getRedisKey(ip: string): string {
   return `tu-coverify:free-ip:${hashedIp}`;
 }
 
-function checkAndRecordInMemory(ip: string): {
-  allowed: boolean;
-  resetHours: number;
-} {
-  const now = Date.now();
-  const cutoff = now - WINDOW_MS;
-  const current = entries.get(ip) ?? { timestamps: [] };
-  current.timestamps = current.timestamps.filter((timestamp) => timestamp > cutoff);
-
-  if (current.timestamps.length >= MAX_REQUESTS) {
-    const oldestTimestamp = current.timestamps[0] ?? now;
-    const resetHours = Math.max(
-      1,
-      Math.ceil((oldestTimestamp + WINDOW_MS - now) / (60 * 60 * 1000))
-    );
-    entries.set(ip, current);
-    return { allowed: false, resetHours };
-  }
-
-  current.timestamps.push(now);
-  entries.set(ip, current);
-  return { allowed: true, resetHours: 24 };
-}
-
 export async function checkAndRecordIpLimit(request: Request): Promise<{
   allowed: boolean;
   resetHours: number;
 }> {
   const ip = getClientIp(request);
 
-  if (!redis) {
-    return checkAndRecordInMemory(ip);
+  if (!hasRedisConfig) {
+    console.error("IP rate limiter is unavailable: Upstash Redis is not configured.");
+    return {
+      allowed: false,
+      resetHours: 1,
+    };
   }
 
   try {
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
     const key = getRedisKey(ip);
     const count = await redis.incr(key);
 
