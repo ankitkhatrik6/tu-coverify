@@ -88,7 +88,11 @@ const DEMO_STUDENTS: BatchStudent[] = [
 ];
 
 export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingle }: CRBulkCoverGeneratorProps) {
-  const { checkCanGenerate, recordSuccessfulGeneration } = useAuth();
+  const {
+    checkCanGenerate,
+    recordSuccessfulGeneration,
+    recordRateLimitReached,
+  } = useAuth();
 
   // Class configuration state
   const [classInfo, setClassInfo] = useState<ClassInfo>({
@@ -363,6 +367,9 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
 
       if (!res.ok) {
         const err = await res.json();
+        if (res.status === 429 && err.rateLimited) {
+          recordRateLimitReached();
+        }
         throw new Error(err.details || "Failed to generate combined PDF");
       }
 
@@ -420,6 +427,9 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
 
       if (!res.ok) {
         const err = await res.json();
+        if (res.status === 429 && err.rateLimited) {
+          recordRateLimitReached();
+        }
         throw new Error(err.details || "Failed to package ZIP");
       }
 
