@@ -68,6 +68,7 @@ interface AuthContextType {
     docType: "cover" | "batch" | "index",
     format?: "pdf" | "docx" | "zip"
   ) => Promise<void>;
+  recordRateLimitReached: () => void;
   promptLoginForQuota: (reason?: string) => void;
 }
 
@@ -350,6 +351,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const recordRateLimitReached = () => {
+    setDailyCount(DAILY_FREE_LIMIT);
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify([Date.now(), Date.now(), Date.now()])
+      );
+    } catch {
+      // ignore storage error
+    }
+  };
+
   // Save student academic details
   const saveStudentAcademicDetails = async (
     details: StudentAcademicDetails
@@ -410,6 +423,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         verifyUserOtp,
         checkCanGenerate,
         recordSuccessfulGeneration,
+        recordRateLimitReached,
         promptLoginForQuota,
       }}
     >
