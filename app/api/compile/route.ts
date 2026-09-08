@@ -19,6 +19,7 @@ const execAsync = promisify(exec);
 const MAX_BATCH_STUDENTS = 100;
 const MAX_INDEX_ROWS = 200;
 const MAX_LOGO_BYTES = 5 * 1024 * 1024;
+const SUPPORTED_FORMATS = new Set(["pdf", "svg", "png", "typ", "docx"]);
 
 export async function POST(req: NextRequest) {
   const requestBody = await req.clone().json().catch(() => null);
@@ -102,6 +103,13 @@ export async function POST(req: NextRequest) {
 
       format = "pdf",
     } = data;
+
+    if (typeof format !== "string" || !SUPPORTED_FORMATS.has(format)) {
+      return NextResponse.json(
+        { error: "Unsupported document format." },
+        { status: 400 }
+      );
+    }
 
     if (!Array.isArray(students) || students.length > MAX_BATCH_STUDENTS) {
       return NextResponse.json(
