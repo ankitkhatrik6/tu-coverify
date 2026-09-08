@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "crypto";
+
 interface OtpEntry {
   code: string;
   expiresAt: number;
@@ -71,7 +73,13 @@ export function verifyOtpCode(
     };
   }
 
-  if (entry.code !== code.trim()) {
+  const expectedCode = Buffer.from(entry.code);
+  const providedCode = Buffer.from(code.trim());
+  const isValidCode =
+    expectedCode.length === providedCode.length &&
+    timingSafeEqual(expectedCode, providedCode);
+
+  if (!isValidCode) {
     entry.attempts += 1;
     return {
       success: false,

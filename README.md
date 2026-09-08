@@ -89,6 +89,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 4. Copy `.env.example` to `.env.local` and fill in the new Web app configuration values.
 5. Add your local and production domains under **Authentication > Settings > Authorized domains**.
 
+### Production limits
+
+The compile API accepts up to 100 batch students, 200 index rows, and a 5 MB
+logo. Preview requests use SVG or PNG formats and are rate-limited like exports
+when they request a billable format. Configure `UPSTASH_REDIS_REST_URL` and
+`UPSTASH_REDIS_REST_TOKEN` in production; quota-protected endpoints fail closed
+when Redis is unavailable.
+
 The Firebase client reads `NEXT_PUBLIC_FIREBASE_*` variables, so switching projects does not require a code change. `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, and the AI key remain server-side environment variables.
 
 ### Run in Production (Host on Network)

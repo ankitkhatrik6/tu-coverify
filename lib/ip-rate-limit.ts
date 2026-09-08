@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
 import { Redis } from "@upstash/redis";
+import { isIP } from "net";
 
 const WINDOW_MS = 24 * 60 * 60 * 1000;
 const WINDOW_SECONDS = WINDOW_MS / 1000;
@@ -10,10 +11,11 @@ const hasRedisConfig = Boolean(
 
 function getClientIp(request: Request): string {
   const realIp = request.headers.get("x-real-ip");
-  if (realIp) return realIp.trim();
+  if (realIp && isIP(realIp.trim())) return realIp.trim();
 
   const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor) return forwardedFor.split(",")[0].trim();
+  const forwardedIp = forwardedFor?.split(",")[0].trim();
+  if (forwardedIp && isIP(forwardedIp)) return forwardedIp;
 
   return "unknown";
 }

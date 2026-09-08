@@ -307,11 +307,13 @@ export default function Home() {
             indexTitle,
             indexRows,
             format: "png",
+            preview: true,
           }
         : {
             ...formData,
             logoBase64,
             format: "svg",
+            preview: true,
           };
 
       const response = await fetch("/api/compile", {
