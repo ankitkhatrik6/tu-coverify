@@ -16,6 +16,9 @@ import JSZip from "jszip";
 export const dynamic = "force-dynamic";
 
 const execAsync = promisify(exec);
+const MAX_BATCH_STUDENTS = 100;
+const MAX_INDEX_ROWS = 200;
+const MAX_LOGO_BYTES = 5 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   const requestBody = await req.clone().json().catch(() => null);
@@ -99,6 +102,25 @@ export async function POST(req: NextRequest) {
 
       format = "pdf",
     } = data;
+
+    if (!Array.isArray(students) || students.length > MAX_BATCH_STUDENTS) {
+      return NextResponse.json(
+        { error: `A maximum of ${MAX_BATCH_STUDENTS} students is supported.` },
+        { status: 400 }
+      );
+    }
+    if (!Array.isArray(indexRows) || indexRows.length > MAX_INDEX_ROWS) {
+      return NextResponse.json(
+        { error: `A maximum of ${MAX_INDEX_ROWS} index rows is supported.` },
+        { status: 400 }
+      );
+    }
+    if (typeof logoBase64 === "string" && Buffer.byteLength(logoBase64, "utf8") > MAX_LOGO_BYTES * 1.4) {
+      return NextResponse.json(
+        { error: "The logo file must be 5 MB or smaller." },
+        { status: 400 }
+      );
+    }
 
     // Helper for escaping Typst markup
     const escapeTypst = (val: any): string => {
@@ -857,15 +879,10 @@ ${buildStudentPageMarkup(student)}
       }
 
       // Convert rows array to Typst syntax
-      // Safe escaping for Typst bracket syntax inside rows
       const rowsMarkup = indexRows && indexRows.length > 0
         ? indexRows
             .map((row: any) => {
-              const cleanTitle = (row.title || "")
-                .replace(/\\/g, "\\\\")
-                .replace(/\[/g, "\\[")
-                .replace(/\]/g, "\\]");
-              return `[${row.sn || ""}], [${cleanTitle}], [${row.date || ""}], [${row.signature || ""}]`;
+              return `[${escapeTypst(row.sn)}], [${escapeTypst(row.title)}], [${escapeTypst(row.date)}], [${escapeTypst(row.signature)}]`;
             })
             .join(",\n  ")
         : "";
@@ -886,7 +903,7 @@ ${buildStudentPageMarkup(student)}
 #v(10pt)
 
 #align(center)[
-  #text(size: 22pt, weight: "bold")[${indexTitle}]
+  #text(size: 22pt, weight: "bold")[${escapeTypst(indexTitle)}]
 ]
 
 #v(22pt)
@@ -1156,11 +1173,11 @@ ${buildStudentPageMarkup(student)}
     #v(3pt)
     #text(size: 16pt)[Tribhuvan University] \\
     #v(3pt)
-    #text(size: 15pt)[${facultyOrInstitute}] \\
+    #text(size: 15pt)[${escapeTypst(facultyOrInstitute)}] \\
     #v(6pt)
-    #text(size: 20pt, weight: "bold")[${collegeName}] \\
+    #text(size: 20pt, weight: "bold")[${escapeTypst(collegeName)}] \\
     #v(3pt)
-    #text(size: 13pt)[${collegeLocation}]
+    #text(size: 13pt)[${escapeTypst(collegeLocation)}]
   ],
   image("${collegeLogoPath}", width: 62pt)
 )
@@ -1188,11 +1205,11 @@ ${buildStudentPageMarkup(student)}
 #align(center)[
   #text(size: 18pt, weight: "bold")[Lab Report] \\
   #v(5pt)
-  #text(size: 16pt, weight: "bold")[${subjectName}] \\
+  #text(size: 16pt, weight: "bold")[${escapeTypst(subjectName)}] \\
   #v(2pt)
-  #text(size: 15pt, weight: "bold")[(${courseCode})] \\
+  #text(size: 15pt, weight: "bold")[(${escapeTypst(courseCode)})] \\
   #v(5pt)
-  #text(size: 16pt, weight: "bold")[${program} ${semester}]
+  #text(size: 16pt, weight: "bold")[${escapeTypst(program)} ${escapeTypst(semester)}]
 ]
 
 #v(45pt)
@@ -1207,12 +1224,12 @@ ${buildStudentPageMarkup(student)}
     #v(10pt)
     #stack(
       spacing: 9pt,
-      [#text(weight: "bold")[Name:] ${studentName}],
-      [#text(weight: "bold")[Roll no.:] ${rollNumber}],
-      [#text(weight: "bold")[Semester:] ${semester}],
-      [#text(weight: "bold")[Batch:] ${batch}],
-      [#text(weight: "bold")[Regd. No:] ${regdNumber}],
-      [#text(weight: "bold")[Exam Roll No:] ${examRollNumber}]
+      [#text(weight: "bold")[Name:] ${escapeTypst(studentName)}],
+      [#text(weight: "bold")[Roll no.:] ${escapeTypst(rollNumber)}],
+      [#text(weight: "bold")[Semester:] ${escapeTypst(semester)}],
+      [#text(weight: "bold")[Batch:] ${escapeTypst(batch)}],
+      [#text(weight: "bold")[Regd. No:] ${escapeTypst(regdNumber)}],
+      [#text(weight: "bold")[Exam Roll No:] ${escapeTypst(examRollNumber)}]
     )
   ],
   [
@@ -1222,8 +1239,8 @@ ${buildStudentPageMarkup(student)}
     #v(6pt)
     #stack(
       spacing: 9pt,
-      [#text(size: 14pt)[${teacherName}]],
-      [#text(size: 14pt)[${teacherDepartment}]]
+      [#text(size: 14pt)[${escapeTypst(teacherName)}]],
+      [#text(size: 14pt)[${escapeTypst(teacherDepartment)}]]
     )
   ]
 )
