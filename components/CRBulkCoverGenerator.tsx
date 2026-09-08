@@ -308,6 +308,7 @@ export default function CRBulkCoverGenerator({ initialClassInfo, onSyncWithSingl
       const payload = {
         documentType: "batch_cover",
         batchFormat: "preview",
+        preview: true,
         previewIndex: targetIdx,
         ...classInfo,
         students,
