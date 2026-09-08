@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Groq from "groq-sdk";
+import { createHash } from "crypto";
+import { Redis } from "@upstash/redis";
 
 interface RequestBody {
   prompt: string;
@@ -10,59 +12,45 @@ interface RequestBody {
   userEmail?: string;
 }
 
-// In-memory rate limiting store: identifier -> timestamp array
-const rateLimitMap = new Map<string, number[]>();
 const RATE_LIMIT_MAX = 5;
-const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+const RATE_LIMIT_WINDOW_SECONDS = 24 * 60 * 60;
+const hasRedisConfig = Boolean(
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+);
 const MAX_PROMPT_LENGTH = 12000;
 const MAX_INDEX_TITLE_LENGTH = 200;
 const MAX_IDENTIFIER_LENGTH = 200;
 
-function checkAndRecordRateLimit(identifiers: string[]): { allowed: boolean; remaining: number; resetHours: number } {
-  const now = Date.now();
-  const windowStart = now - RATE_LIMIT_WINDOW_MS;
-
-  // Cleanup old entries
-  for (const [key, timestamps] of rateLimitMap.entries()) {
-    const valid = timestamps.filter((t) => t > windowStart);
-    if (valid.length === 0) {
-      rateLimitMap.delete(key);
-    } else {
-      rateLimitMap.set(key, valid);
-    }
+async function checkAndRecordRateLimit(
+  identifiers: string[]
+): Promise<{ allowed: boolean; remaining: number; resetHours: number }> {
+  if (!hasRedisConfig) {
+    return { allowed: false, remaining: 0, resetHours: 1 };
   }
 
-  // Find the highest usage count across all provided identifiers (IP, deviceId, etc.)
-  let maxCount = 0;
-  let oldestTimestamp = now;
-
-  for (const id of identifiers) {
-    if (!id) continue;
-    const timestamps = (rateLimitMap.get(id) || []).filter((t) => t > windowStart);
-    rateLimitMap.set(id, timestamps);
-    if (timestamps.length > maxCount) {
-      maxCount = timestamps.length;
-      if (timestamps.length > 0) {
-        oldestTimestamp = timestamps[0];
-      }
-    }
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+  const counts = await Promise.all(
+    identifiers.map(async (identifier) => {
+      const key = `tu-coverify:ai:${createHash("sha256").update(identifier).digest("hex")}`;
+      const count = await redis.incr(key);
+      if (count === 1) await redis.expire(key, RATE_LIMIT_WINDOW_SECONDS);
+      return { count, ttl: await redis.ttl(key) };
+    })
+  );
+  const exceeded = counts.find(({ count }) => count > RATE_LIMIT_MAX);
+  if (exceeded) {
+    return {
+      allowed: false,
+      remaining: 0,
+      resetHours: Math.max(1, Math.ceil(Math.max(1, exceeded.ttl) / 3600)),
+    };
   }
 
-  if (maxCount >= RATE_LIMIT_MAX) {
-    const timeUntilResetMs = Math.max(0, oldestTimestamp + RATE_LIMIT_WINDOW_MS - now);
-    const resetHours = Math.max(1, Math.ceil(timeUntilResetMs / (60 * 60 * 1000)));
-    return { allowed: false, remaining: 0, resetHours };
-  }
-
-  // Record this request under all valid identifiers
-  for (const id of identifiers) {
-    if (!id) continue;
-    const current = rateLimitMap.get(id) || [];
-    current.push(now);
-    rateLimitMap.set(id, current);
-  }
-
-  return { allowed: true, remaining: RATE_LIMIT_MAX - (maxCount + 1), resetHours: 24 };
+  const maxCount = Math.max(...counts.map(({ count }) => count), 0);
+  return { allowed: true, remaining: RATE_LIMIT_MAX - maxCount, resetHours: 24 };
 }
 
 interface ParsedIndexRow {
@@ -255,7 +243,7 @@ export async function POST(req: NextRequest) {
 
     // If we have any identifier, check rate limits (5 per 24 hours)
     if (identifiers.length > 0) {
-      const rateStatus = checkAndRecordRateLimit(identifiers);
+      const rateStatus = await checkAndRecordRateLimit(identifiers);
       if (!rateStatus.allowed) {
         return NextResponse.json(
           {
